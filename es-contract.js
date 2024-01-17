@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 import IS from "./typofany.module.js";
 
 export default typeContractFactory;
@@ -7,10 +9,10 @@ function typeContractFactory({logViolations = false, alwaysThrow = false} = {}) 
   
   return { contracts, IS, tryJSON };
   
+  
   function addContract( {
-                          name, method, expected, defaultValue, customReport,
-                          reportFn, shouldThrow, reportViolationsByDefault } = {}
-  ) {
+      name, method, expected, defaultValue, customReport,
+      reportFn, shouldThrow, reportViolationsByDefault } = {} ) {
     name = name || method.name;
     const expectedOk = IS(expected, String) && expected.length || IS(expected, Function);
     const isMethod = IS(method, Function);
@@ -29,11 +31,10 @@ function typeContractFactory({logViolations = false, alwaysThrow = false} = {}) 
 }
 
 function createEmbedded( {
-                           name, method, expected,
-                           defaultValue, customReport, reportFn,
-                           logViolations, shouldThrow, alwaysThrow,
-                           reportViolationsByDefault } = {}
-) {
+     name, method, expected,
+     defaultValue, customReport, reportFn,
+     logViolations, shouldThrow, alwaysThrow,
+     reportViolationsByDefault } = {} ) {
   return function(value, ...args) {
     let resolved = method(value, ...args);
     const argsWithValue = IS(args[0], Object) && args[0] || {};
@@ -104,7 +105,7 @@ function formatInput(inputValue) {
       IS(v, Object) ? tryJSON(v) : String(v);
   return IS(inputValue, Object)
     ? tryJSON(inputValue)
-    : /Array\(/.test(inputValue?.constructor)
+    : /Array\(/.test(inputValue?.constructor.toString())
       ? `[${[...inputValue].map(arrayMapper)}]`
       : String(inputValue);
 }

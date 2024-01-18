@@ -1,5 +1,3 @@
-// noinspection JSUnusedGlobalSymbols
-
 import IS from "./typofany.module.js";
 
 export default typeContractFactory;

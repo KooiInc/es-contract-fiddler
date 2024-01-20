@@ -3,36 +3,50 @@ import IS from "./typofany.module.js";
 export default typeContractFactory;
 
 function typeContractFactory({logViolations = false, alwaysThrow = false} = {}) {
-  const contracts = { addContract, };
+  const contracts = { addContract, addContracts };
+  const checksLocal = localChecks();
+  addLocalContracts({ contracts, ...checksLocal } );
   
-  return { contracts, IS, tryJSON };
+  return Object.freeze({ contracts, IS, tryJSON });
   
-  
-  function addContract( {
-      name, method, expected, defaultValue, customReport,
-      reportFn, shouldThrow, reportViolationsByDefault } = {} ) {
-    name = name || method.name;
-    const expectedOk = IS(expected, String) && expected.length || IS(expected, Function);
-    const isMethod = IS(method, Function);
-    
-    if (!name && !isMethod && !expectedOk) {
-      throw new TypeError(`TypeContractFactory::addContract: parameters invalid`);
+  function addContracts(contractLiterals) {
+    if (!contracts.addContracts_Contract(contractLiterals)) {
+      return;
     }
     
-    const embedded = createEmbedded( {
+    const entries = Object.entries(contractLiterals);
+    
+    for (let [name, contract] of entries) {
+      addContract( { ...contract, name, paramsChecked: true } );
+      //                                ^ avoid checking twice
+    }
+  }
+  
+  function addContract( {
+                          name, method, expected, defaultValue, customReport,
+                          reportFn, shouldThrow, reportViolationsByDefault,
+                          paramsChecked = false } = {} ) {
+    name = name || method?.name;
+    const paramContract = contracts.addContract_Contract || checksLocal.checkSingleContractParameters;
+    
+    if (!paramsChecked && !paramContract({name, method, expected})) {
+      return;
+    }
+    
+    const embedded = embedContractMethod( {
       name, method, expected, defaultValue,
       reportFn,  customReport, reportViolationsByDefault,
       logViolations, shouldThrow, alwaysThrow } );
     
-    Object.defineProperty( contracts, name, { value: embedded, } );
+    return Object.defineProperty( contracts, name, { value: embedded, enumerable: true } );
   }
 }
 
-function createEmbedded( {
-     name, method, expected,
-     defaultValue, customReport, reportFn,
-     logViolations, shouldThrow, alwaysThrow,
-     reportViolationsByDefault } = {} ) {
+function embedContractMethod( {
+                                name, method, expected,
+                                defaultValue, customReport, reportFn,
+                                logViolations, shouldThrow, alwaysThrow,
+                                reportViolationsByDefault } = {} ) {
   return function(value, ...args) {
     let resolved = method(value, ...args);
     const argsWithValue = IS(args[0], Object) && args[0] || {};
@@ -67,6 +81,61 @@ function createEmbedded( {
     
     return resolved;
   }
+}
+
+function localChecks() {
+  const checkLambdas = {
+    nameOk: name => IS(name, String) && name.trim().length,
+    expectedOk: expected => IS(expected, String) && expected.length || IS(expected, Function),
+    isMethod: method => IS(method, Function),
+  };
+  
+  function checkSingleContractParameters({name, method, expected} = {}) {
+    return name && checkLambdas.nameOk(name) &&
+      method && checkLambdas.isMethod(method) &&
+      expected && checkLambdas.expectedOk(expected);
+  }
+  return {...checkLambdas, checkSingleContractParameters};
+}
+
+function addLocalContracts({ contracts, nameOk, expectedOk, isMethod, checkSingleContractParameters }) {
+  contracts.addContract({
+    method: nameOk,
+    expected: `The contract to add needs a name (String)`,
+    reportViolationsByDefault: true,
+  });
+  contracts.addContract({
+    method: isMethod,
+    expected: `The contract to add needs a method (Function)`,
+    reportViolationsByDefault: true,
+  });
+  contracts.addContract({
+    method: expectedOk,
+    expected: `The contract to add needs an expected value method (String|Function)`,
+    reportViolationsByDefault: true,
+  });
+  contracts.addContract({
+    name: `addContracts_Contract`,
+    method: literals => {
+      const checked = IS(literals, Object) &&
+        [...Object.entries(literals)].filter( ([, value]) =>
+          (value.method && isMethod(value.method) &&
+            value.expected && expectedOk(value.expected)))
+          .length > 0;
+      
+      return checked ? literals : undefined;
+    },
+    expected: `the parameter for [addContracts] should be at least ` +
+      `{ [contractName]: { method: Function, expected: String|Function } }`,
+    reportViolationsByDefault: true,
+  });
+  contracts.addContract({
+    name: `addContract_Contract`,
+    method: checkSingleContractParameters,
+    expected: `addContract parameters should at least be {name, method, expected}` +
+      `\n   (when method is a named function, the name was derived from that)`,
+    reportViolationsByDefault: true,
+  });
 }
 
 function getViolationReport( {

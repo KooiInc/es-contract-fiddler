@@ -39,8 +39,7 @@ function typeContractFactory({logViolations = false, alwaysThrow = false} = {}) 
 }
 
 function createContractMethod( params = destructuredPresets.createContract ) {
-  let { name, method, expected, defaultValue, customReport, reportFn, logViolations,
-    shouldThrow = false, alwaysThrow = false, reportViolationsByDefault = false } = params;
+  let { name, method, expected, defaultValue, customReport, reportFn, logViolations, shouldThrow } = params;
   return function(value, ...args) {
     let resolved = method(value, ...args);
     const argsWithValue = IS(args[0], Object) && {...args[0], value} || {value};
@@ -78,7 +77,7 @@ function createContractMethod( params = destructuredPresets.createContract ) {
 
 function getParams4Destructuring() {
   const [ name, method, expected, defaultValue, customReport,
-          reportFn, inputValue ] = [...Array(7)];
+    reportFn, inputValue ] = [...Array(7)];
   return {
     get reportViolations() {
       return { inputValue, defaultValue, shouldBe: `unknown or n/a`, fnName: `unknown`, };

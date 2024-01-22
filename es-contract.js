@@ -1,8 +1,10 @@
 import IS from "./typofany.module.js";
+import language from "./Language.js";
 export default typeContractFactory;
 
 const destructuredPresets = getParams4Destructuring();
 const localFactoryCheckMethods = getFactoryChecks();
+const lang = language.EN;
 
 function typeContractFactory({logViolations = false, alwaysThrow = false} = {}) {
   const contracts = { addContract, addContracts };
@@ -81,7 +83,7 @@ function getParams4Destructuring() {
     reportFn, inputValue ] = [...Array(7)];
   return {
     get reportViolations() {
-      return { inputValue, defaultValue, shouldBe: `unknown or n/a`, fnName: `unknown`, };
+      return { inputValue, defaultValue, shouldBe: lang.unknowOrNa, fnName: lang.unknown, };
     },
     get createContract() {
       return { name, method, expected, defaultValue, customReport, reportFn,
@@ -111,21 +113,21 @@ function addFactoryContracts( contracts ) {
   const {nameOk, expectedOk, isMethod, checkSingleContractParameters} = localFactoryCheckMethods;
   contracts.addContract({
     method: nameOk,
-    expected: `The contract to add needs a name (String)`,
+    expected: lang.nameOkExpected,
     reportViolationsByDefault: true,
   });
   contracts.addContract({
     method: isMethod,
-    expected: `The contract to add needs a method (Function)`,
+    expected: lang.isMethodExpected,
     reportViolationsByDefault: true,
   });
   contracts.addContract({
     method: expectedOk,
-    expected: `The contract to add needs an expected value method (String|Function)`,
+    expected: lang.expectedOkExpected,
     reportViolationsByDefault: true,
   });
   contracts.addContract({
-    name: `addContracts_Contract`,
+    name: lang.addContracts_Contract_Name,
     method: literals => {
       const checked = IS(literals, Object) &&
         [...Object.entries(literals)].filter( ([, value]) =>
@@ -136,27 +138,24 @@ function addFactoryContracts( contracts ) {
       
       return checked ? literals : undefined;
     },
-    expected: `the parameter for [addContracts] should be at least ` +
-      `{ [contractName]: { method: Function, expected: String|Function } }`,
+    expected: lang.addContracts_Contract_Expected,
     reportViolationsByDefault: true,
   });
   contracts.addContract({
-    name: `addContract_Contract`,
+    name: lang.addContract_Contract_Name,
     method: checkSingleContractParameters,
-    expected: `addContract parameters should at least be {name, method, expected}` +
-      `\n   (when method is a named function, the name was derived from that)`,
+    expected: lang.addContract_Contract_Expected,
     reportViolationsByDefault: true,
   });
 }
 
 function getViolationReport( params = destructuredPresets.reportViolations ) {
   const {inputValue, defaultValue, shouldBe, fnName } = params;
-  const sorryDave = `✘ (contracts.${fnName}, input ${formatInput(inputValue)}) I'm sorry Dave, I can't do that.`;
+  const sorryDave = lang.report_sorry(fnName, formatInput(inputValue));
   const noInput = isNothing(inputValue);
-  const forValue =  noInput ? `${sorryDave}\n   Try providing an input value` : `${sorryDave}`;
-  const itIsNot = noInput ? `` : `\n   ${shouldBe}.`;
-  const defaultVal = !isNothing(defaultValue) ? `\n   Using the assigned default value (${
-    tryJSON(defaultValue)}) instead.` : ``;
+  const forValue =  lang.report_forValue(noInput, sorryDave);
+  const itIsNot = lang.report_IsNot(noInput, shouldBe);
+  const defaultVal = lang.report_defaultValue(isNothing(defaultValue), defaultValue);
   
   return `${forValue}${itIsNot}${defaultVal}`;
 }

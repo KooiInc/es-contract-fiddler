@@ -22,7 +22,7 @@ function typeContractFactory({logViolations = false, alwaysThrow = false} = {}) 
   
   function addContract( params = destructuredPresets.addContract ) {
     let { name, method, expected, defaultValue, customReport, reportFn,
-          shouldThrow, reportViolationsByDefault, paramsChecked } = params;
+      shouldThrow, reportViolationsByDefault, paramsChecked } = params;
     name = name || method?.name;
     const addContract_Contract = contracts.addContract_Contract ||
       localFactoryCheckMethods.checkSingleContractParameters;
@@ -40,7 +40,7 @@ function typeContractFactory({logViolations = false, alwaysThrow = false} = {}) 
 
 function createContractMethod( params = destructuredPresets.createContract ) {
   let { name, method, expected, defaultValue, customReport, reportFn,
-        logViolations, shouldThrow, reportViolationsByDefault, alwaysThrow } = params;
+    logViolations, shouldThrow, reportViolationsByDefault, alwaysThrow } = params;
   return function(value, ...args) {
     let resolved = method(value, ...args);
     const argsWithValue = IS(args[0], Object) && {...args[0], value} || {value};
@@ -129,9 +129,10 @@ function addFactoryContracts( contracts ) {
     method: literals => {
       const checked = IS(literals, Object) &&
         [...Object.entries(literals)].filter( ([, value]) =>
-          (value.method && isMethod(value.method) &&
-            value.expected && expectedOk(value.expected)))
-          .length > 0;
+          value.method &&
+          isMethod(value.method) &&
+          value.expected &&
+          expectedOk(value.expected) ).length > 0;
       
       return checked ? literals : undefined;
     },

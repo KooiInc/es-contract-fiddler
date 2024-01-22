@@ -24,7 +24,8 @@ function typeContractFactory({logViolations = false, alwaysThrow = false} = {}) 
     let { name, method, expected, defaultValue, customReport, reportFn,
       shouldThrow, reportViolationsByDefault, paramsChecked } = params;
     name = name || method?.name;
-    const addContract_Contract = contracts.addContract_Contract || localFactoryCheckMethods.checkSingleContractParameters;
+    const addContract_Contract = contracts.addContract_Contract ||
+      localFactoryCheckMethods.checkSingleContractParameters;
     
     if (!paramsChecked && !addContract_Contract({name, method, expected})) { return; }
     
@@ -77,7 +78,7 @@ function createContractMethod( params = destructuredPresets.createContract ) {
 
 function getParams4Destructuring() {
   const [ name, method, expected, defaultValue, customReport,
-    reportFn, inputValue ] = [...Array(7)];
+          reportFn, inputValue ] = [...Array(7)];
   return {
     get reportViolations() {
       return { inputValue, defaultValue, shouldBe: `unknown or n/a`, fnName: `unknown`, };

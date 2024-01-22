@@ -2,11 +2,11 @@ import IS from "./typofany.module.js";
 export default typeContractFactory;
 
 const destructuredPresets = getParams4Destructuring();
+const localFactoryCheckMethods = getFactoryChecks();
 
 function typeContractFactory({logViolations = false, alwaysThrow = false} = {}) {
   const contracts = { addContract, addContracts };
-  const checksLocal = getFactoryChecks();
-  addFactoryContracts({ contracts, ...checksLocal } );
+  addFactoryContracts( contracts );
   
   return Object.freeze({ contracts, IS, tryJSON });
   
@@ -24,7 +24,7 @@ function typeContractFactory({logViolations = false, alwaysThrow = false} = {}) 
     let { name, method, expected, defaultValue, customReport, reportFn,
       shouldThrow, reportViolationsByDefault, paramsChecked } = params;
     name = name || method?.name;
-    const addContract_Contract = contracts.addContract_Contract || checksLocal.checkSingleContractParameters;
+    const addContract_Contract = contracts.addContract_Contract || localFactoryCheckMethods.checkSingleContractParameters;
     
     if (!paramsChecked && !addContract_Contract({name, method, expected})) { return; }
     
@@ -106,7 +106,8 @@ function getFactoryChecks() {
   return { nameOk, expectedOk, isMethod, checkSingleContractParameters  };
 }
 
-function addFactoryContracts({ contracts, nameOk, expectedOk, isMethod, checkSingleContractParameters }) {
+function addFactoryContracts( contracts ) {
+  const {nameOk, expectedOk, isMethod, checkSingleContractParameters} = localFactoryCheckMethods;
   contracts.addContract({
     method: nameOk,
     expected: `The contract to add needs a name (String)`,

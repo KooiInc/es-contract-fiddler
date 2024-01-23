@@ -10,10 +10,11 @@ export default {
     addContract_Contract_Expected: `addContract parameters should at least be {name, method, expected}` +
       `\n   (when method is a named function, the name was derived from that)`,
     report_sorry: (fnName, inputValue) => `✘ Contract violation for [${fnName}], input ${inputValue}`,
-    report_forValue: (noInput, sorryDave) => noInput ? `${sorryDave}\n   Try providing an input value` : `${sorryDave}`,
+    report_forValue: (noInput, sorryDave) => noInput
+      ? `${sorryDave}\n   Try providing an input value` : `${sorryDave}`,
     report_IsNot: (noInput, shouldBe) => noInput ? `` : `\n   ${shouldBe}.`,
-    report_defaultValue: (hasValue, defaultValue) => !hasValue ? `\n   Using the assigned default value (${
-      defaultValue}) instead.` : ``,
+    report_defaultValue: (hasValue, defaultValue) => !hasValue
+      ? `\n   Using the assigned default value (${defaultValue}) instead.` : ``,
   },
   NL: {
     unknownOrNa: `onbekend of nvt`,
@@ -26,9 +27,11 @@ export default {
     addContract_Contract_Expected: `De invoer vooor [addContract] moet tenminste {name, method, expected} zijn` +
       `\n   (wanneer de eigenschap [method] een functie met naam was wordt [name] daarvan afgeleid)`,
     report_sorry: (fnName, inputValue) => `✘ Contractbreuk voor [${fnName}], input ${inputValue}`,
-    report_forValue: (noInput, sorryDave) => noInput ? `${sorryDave}\n   Probeer een (input-)waarde te geven` : `${sorryDave}`,
+    report_forValue: (noInput, sorryDave) => noInput
+        ? `${sorryDave}\n   Probeer een (input-)waarde te geven` : `${sorryDave}`,
     report_IsNot: (noInput, shouldBe) => noInput ? `` : `\n   ${shouldBe}.`,
-    report_defaultValue: (hasValue, defaultValue) => !hasValue ? `\n   In plaats daarvan wordt de toegekende standaardwaarde (${
+    report_defaultValue: (hasValue, defaultValue) => !hasValue
+      ? `\n   In plaats daarvan wordt de toegekende standaardwaarde (${
       defaultValue}) gebruikt.` : ``,
   }
 }

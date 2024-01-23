@@ -157,7 +157,9 @@ function createHeaderAndExplanation() {
   $(`<div class="container">`).append($(`#log2screen`));
   const sbLink = isSB
     ? `<p><a target="_top" href="//stackblitz.com/@KooiInc">All projects</a> | ` : ``;
-  print(`${auxText.HeaderText(sbLink)}
+  const githubLink = `<a target="${isSB ? `_blank` : `_top`}" href="https://github.com/KooiInc/es-contract-fiddler"
+      >Github</a>`;
+  print(`${auxText.HeaderText(sbLink, githubLink)}
     <p><button class="explainer closed">explainer</button>
     <button class="showViolations">Show contract violations</button></p>
     ${auxText.explainerText}`);
@@ -310,6 +312,7 @@ function styleDocument() {
       font-style: italic;
       color: #777;
       margin-bottom: 1rem;
+      max-width: 70%;
     }`,
     `.q:before {
       font-family: Georgia, verdana;

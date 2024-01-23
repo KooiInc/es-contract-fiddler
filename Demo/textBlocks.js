@@ -197,10 +197,10 @@ export default {
     max = inclusive && max !== Number.MAX_SAFE_INTEGER ? max + 1 : max;
     return IS(nr, Number) && nr > min && nr < max && nr ||  undefined;
   }</code></pre>`,
-  HeaderText: sbLink => `!!<p>
+  HeaderText: (sbLink, githubLink) => `!!<p>
      ${sbLink}
       <a target="_blank" href="https://en.wikipedia.org/wiki/Design_by_contract">See also...</a> |
-      <a target="_blank" href="https://github.com/KooiInc/es-contract-fiddler">@GitHub</a></p>
+      ${githubLink}</p>
     <h2>Use a 'Design by contract' pattern to check variable types</h2>
     <div class="q">
       <div>
@@ -213,7 +213,7 @@ export default {
       <div>
       Static typing has been proposed as a solution, but static type systems are too clumsy to express the
       constraints that we actually need. Consider division. Dividing a number by zero is meaningless,
-      yet we are unable to statically type the denominator as a non-zero number.
+      yet we are unable to statically type the denominator as a non-zero number.<br>
       Static typing shrinks the set of invalid inputs, but does not necessarily eliminate them.
       <a target="_blank" href="https://james.diacono.com.au/design_by_contract.html">Source</a>
       </div>

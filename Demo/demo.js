@@ -4,7 +4,7 @@ const isSB = /stackblitz/i.test(location.href);
 const { log:print } = logFactory();
 isSB && console.clear();
 const toCode = str => `<code class="inline">${str}</code>`;
-const {contracts, IS,} = contractFactory({reporter: reportToDiv});
+const {contracts, IS,} = contractFactory({reporter: demoReporter});
 const world4TemplateString = `world`;
 window.contracts = contracts;
 window.IS = IS;
@@ -17,7 +17,7 @@ createHandling();
 createDemo();
 Prism.highlightAll();
 
-function reportToDiv(violationInfo) {
+function demoReporter(violationInfo) {
   if (contracts.plainString(violationInfo)) {
     reportDiv.HTML.set(`<pre>${formatViolationForHtml(violationInfo)}</pre>`, true);
   }
@@ -66,7 +66,7 @@ function addContracts4Demo(contracts) {
     divide: {
       customReport({value, numerator, denominator} = {}) {
         if ( !isFinite( (value ?? numerator)/(denominator ?? 0) ) ) {
-          reportToDiv(`✘ Contract violation for divide`+
+          demoReporter(`✘ Contract violation for divide`+
             `\n   [input: ${value ?? numerator} / denominator: ${denominator}] is not finite.` +
             `\n   The denominator was 0, so divided the numerator (${
               value}) by (the default value) 1`);

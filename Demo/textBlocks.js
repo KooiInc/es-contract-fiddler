@@ -24,11 +24,13 @@ export default {
    *   [alwaysThrow]: boolean (default false),   // throw when violated by default
    *                                             // (otherwise per contract)
    * });
-   *
-   * // initialize contracts:
-   * const { contracts, IS } = contractFactory();
-   * // [contracts] has two methods: addContract and addContracts
-   *
+   */
+   // initialize contracts (for demo a custom reporter function is used):
+   const { contracts, IS } = contractFactory({reporter: demoReporter});
+   
+   /**
+   * [contracts] has two methods: addContract and addContracts
+   * ------
    * syntax
    * ------
    * contracts.addContract({

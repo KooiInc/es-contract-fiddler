@@ -6,7 +6,7 @@ const destructuredPresets = getParams4Destructuring();
 const localFactoryCheckMethods = getFactoryChecks();
 const lang = language.EN;
 
-function typeContractFactory({logViolations = false, alwaysThrow = false} = {}) {
+function typeContractFactory({reporter = defaultViolationReporter, logViolations = false, alwaysThrow = false} = {}) {
   const contracts = { addContract, addContracts };
   addFactoryContracts( contracts );
   
@@ -32,7 +32,7 @@ function typeContractFactory({logViolations = false, alwaysThrow = false} = {}) 
     if (!paramsChecked && !addContract_Contract({name, method, expected})) { return; }
     
     const embedded = createContractMethod( {
-      name, method, expected, defaultValue,
+      name, method, expected, defaultValue, reporter,
       reportFn,  customReport, reportViolationsByDefault,
       logViolations, shouldThrow, alwaysThrow } );
     
@@ -41,7 +41,7 @@ function typeContractFactory({logViolations = false, alwaysThrow = false} = {}) 
 }
 
 function createContractMethod( params = destructuredPresets.createContract ) {
-  let { name, method, expected, defaultValue, customReport, reportFn,
+  let { name, method, expected, defaultValue, customReport, reportFn, reporter,
     logViolations, shouldThrow, reportViolationsByDefault, alwaysThrow } = params;
   return function(value, ...args) {
     let resolved = method(value, ...args);
@@ -70,7 +70,7 @@ function createContractMethod( params = destructuredPresets.createContract ) {
           throw new TypeError(aggregatedReport);
         }
         
-        reportFn(aggregatedReport);
+        reporter(aggregatedReport);
       }
     }
     
@@ -87,12 +87,14 @@ function getParams4Destructuring() {
     },
     get createContract() {
       return { name, method, expected, defaultValue, customReport, reportFn,
+        reporter: defaultViolationReporter,
         logViolations: false, shouldThrow: false, alwaysThrow: false,
         reportViolationsByDefault: false };
     },
     get addContract() {
       return { name, method, expected, defaultValue, customReport, reportFn,
-        shouldThrow: false, reportViolationsByDefault: false, paramsChecked: false };
+        reporter: defaultViolationReporter, shouldThrow: false,
+        reportViolationsByDefault: false, paramsChecked: false };
     },
   }
 }

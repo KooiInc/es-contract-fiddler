@@ -1,6 +1,8 @@
-import {logFactory, $} from "./helpers.bundled.js";
 import contractFactory from "../es-contract.js";
+import {logFactory, $} from "./helpers.bundled.js";
+const isSB = /stackblitz/i.test(location.href);
 const { log:print } = logFactory();
+isSB && console.clear();
 const toCode = str => `<code class="inline">${str}</code>`;
 const {contracts, IS,} = contractFactory({reporter: reportToDiv});
 const world4TemplateString = `world`;
@@ -16,8 +18,13 @@ createDemo();
 Prism.highlightAll();
 
 function reportToDiv(violationInfo) {
-  reportDiv.HTML.set(`
-    <pre>  ${violationInfo.replace(/✘/, `  ✘`  ).replace(/\n\s+/g, `\n       `)}</pre>`, true);
+  if (contracts.plainString(violationInfo)) {
+    reportDiv.HTML.set(`<pre>${formatViolationForHtml(violationInfo)}</pre>`, true);
+  }
+}
+
+function formatViolationForHtml(violationInfo) {
+  return violationInfo.replace(/✘/, `  ✘`  ).replace(/\n\s+/g, `\n     `)
 }
 
 function addContracts4Demo(contracts) {
@@ -148,8 +155,9 @@ function addContracts4Demo(contracts) {
 
 function createHeaderAndExplanation() {
   $(`<div class="container">`).append($(`#log2screen`));
-  
-  print(`${auxText.HeaderText}
+  const sbLink = isSB
+    ? `<p><a target="_top" href="//stackblitz.com/@KooiInc">All projects</a> | ` : ``;
+  print(`${auxText.HeaderText(sbLink)}
     <p><button class="explainer closed">explainer</button>
     <button class="showViolations">Show contract violations</button></p>
     ${auxText.explainerText}`);

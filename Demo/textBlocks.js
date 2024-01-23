@@ -15,8 +15,12 @@ export default {
    * initialize using
    * ----------------
    * const { contracts, IS } = contractFactory({
+   *   [reporter]: Function                      // the function to use for
+   *                                             // reporting contract violations
+   *                                             // default: log to console
    *   [logViolations]: boolean (default false), // log violations by default
-   *                                             // (otherwise per contract)
+   *                                             // using [reporter]
+   *                                             // (otherwise log per contract)
    *   [alwaysThrow]: boolean (default false),   // throw when violated by default
    *                                             // (otherwise per contract)
    * });
@@ -193,7 +197,8 @@ export default {
     max = inclusive && max !== Number.MAX_SAFE_INTEGER ? max + 1 : max;
     return IS(nr, Number) && nr > min && nr < max && nr ||  undefined;
   }</code></pre>`,
-  HeaderText: `!!<p>
+  HeaderText: sbLink => `!!<p>
+     ${sbLink}
       <a target="_blank" href="https://en.wikipedia.org/wiki/Design_by_contract">See also...</a> |
       <a target="_blank" href="https://github.com/KooiInc/es-contract-fiddler">@GitHub</a></p>
     <h2>Use a 'Design by contract' pattern to check variable types</h2>
@@ -217,5 +222,5 @@ export default {
       This library enables a programmer to create contracts for variables to use in code.<br>
       See the console for the messaging from contract violations in the examples.<br>
       Click "Open explainer" to open explanation and code for the contracts used in this demo.<br>
-    </div> `
+    </div>`
 };

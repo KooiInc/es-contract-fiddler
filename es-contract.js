@@ -127,7 +127,7 @@ function addFactoryContracts( contracts ) {
     reportViolationsByDefault: true,
   });
   contracts.addContract({
-    name: lang.addContracts_Contract_Name,
+    name: `addContracts_Contract`,
     method: literals => {
       const checked = IS(literals, Object) &&
         [...Object.entries(literals)].filter( ([, value]) =>
@@ -142,7 +142,7 @@ function addFactoryContracts( contracts ) {
     reportViolationsByDefault: true,
   });
   contracts.addContract({
-    name: lang.addContract_Contract_Name,
+    name: `addContract_Contract`,
     method: checkSingleContractParameters,
     expected: lang.addContract_Contract_Expected,
     reportViolationsByDefault: true,

@@ -12,19 +12,20 @@ import auxText from "./textBlocks.js";
 const reportDiv = $(`<div id="ViolationsReport">`);
 styleDocument();
 addContracts4Demo(contracts);
+demoReporter();
 createHeaderAndExplanation();
 createHandling();
 createDemo();
 Prism.highlightAll();
 
 function demoReporter(violationInfo) {
-  if (contracts.plainString(violationInfo)) {
+  if (contracts.plainString(violationInfo, {extraInfo: `\n  **Origin demo.js/demoReporter**`})) {
     reportDiv.HTML.set(`<pre>${formatViolationForHtml(violationInfo)}</pre>`, true);
   }
 }
 
 function formatViolationForHtml(violationInfo) {
-  return violationInfo.replace(/✘/, `  ✘`  ).replace(/\n\s+/g, `\n     `)
+  return violationInfo.replace(/✘/, `  ✘`  ).replace(/\n\s+/g, `\n     `);
 }
 
 function addContracts4Demo(contracts) {
@@ -32,7 +33,7 @@ function addContracts4Demo(contracts) {
   const allContracts = {
     number: {
       method: function number(nr) { return IS(nr, Number) && isFinite(nr) ? nr : undefined; },
-      expected: `a number (integer or float)`, },
+      expected: `Your input should be a number (integer or float)`, },
     numberBetween: {
       method: numberBetween,
       expected({min, max, inclusive} = {}) {
@@ -47,7 +48,8 @@ function addContracts4Demo(contracts) {
     },
     plainString: {
       method: plainString,
-      expected: `Your input is not a string`,
+      expected({extraInfo}) { return `Your input is not a string ${extraInfo ?? ``}`; },
+      reportViolationsByDefault: true
     },
     int: {
       method(nr) { return IS(nr, Number) && isFinite(nr) && nr % 1 === 0 && nr || undefined; },

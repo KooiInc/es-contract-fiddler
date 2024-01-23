@@ -155,8 +155,8 @@ function getViolationReport( params = destructuredPresets.reportViolations ) {
   const {inputValue, defaultValue, shouldBe, fnName } = params;
   const sorryDave = lang.report_sorry(fnName, formatInput(inputValue));
   const noInput = isNothing(inputValue);
-  const forValue =  lang.report_forValue(noInput, sorryDave);
-  const itIsNot = lang.report_IsNot(noInput, shouldBe);
+  const forValue =  lang.report_forValue(sorryDave);
+  const itIsNot = lang.report_Expected(shouldBe);
   const defaultVal = lang.report_defaultValue(isNothing(defaultValue), defaultValue);
   
   return `${forValue}${itIsNot}${defaultVal}`;

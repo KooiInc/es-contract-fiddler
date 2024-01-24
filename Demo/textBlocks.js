@@ -201,7 +201,7 @@ export default {
   }</code></pre>`,
   HeaderText: (sbLink, githubLink) => `!!<p>
      ${sbLink}
-      <a target="_blank" href="https://en.wikipedia.org/wiki/Design_by_contract">See also...</a> |
+      <a target="_blank" href="//en.wikipedia.org/wiki/Design_by_contract">See also...</a> |
       ${githubLink}</p>
     <h2>Use a 'Design by contract' pattern to check variable types</h2>
     <div class="q">
@@ -217,17 +217,22 @@ export default {
       constraints that we actually need. Consider division. Dividing a number by zero is meaningless,
       yet we are unable to statically type the denominator as a non-zero number.<br>
       Static typing shrinks the set of invalid inputs, but does not necessarily eliminate them.
-      <a target="_blank" href="https://james.diacono.com.au/design_by_contract.html">Source</a>
+      <a target="_blank" href="//james.diacono.com.au/design_by_contract.html">Source</a>
       </div>
     </div>
     <div>
       This library enables a programmer to create contracts for variables to use in code.<br>
       See the console for the messaging from contract violations in the examples.<br>
       Click "Open explainer" to open explanation and code for the contracts used in this demo.<br>
-    </div>`,
+    </div>
+    <div>The demo uses the <a target="_blank" href="//github.com/KooiInc/JQL"
+      >JQL-library</a> (<code class="inline">$</code>)</div>`,
   reporterFn: [`!!<h3>System</h3>`,
     `<pre class="line-numbers language-javascript">
-<code class=" line-numbers language-javascript">function demoReporter(violationInfo) {
+<code class=" line-numbers language-javascript">
+const reportDiv = $(\`&lt;div id="ViolationsReport">\`);
+// [...]
+function demoReporter(violationInfo) {
   const infoOk = contracts.plainString(
     violationInfo,
     { extraInfo: \`\\n  ** Origin demo.js/demoReporter: no input! **\` }

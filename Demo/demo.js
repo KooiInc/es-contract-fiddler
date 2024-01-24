@@ -9,7 +9,7 @@ const world4TemplateString = `world`;
 window.contracts = contracts;
 window.IS = IS;
 import auxText from "./textBlocks.js";
-const reportDiv = $(`<div id="ViolationsReport">`);
+const reportDiv = $.div({id:`ViolationsReport`}).append(`<h3>All logged contract violations</h3>`);
 styleDocument();
 addContracts4Demo(contracts);
 createHeaderAndExplanation();
@@ -313,7 +313,7 @@ function demoReporter(violationInfo) {
     violationInfo,
     { extraInfo: `** Origin demo.js/demoReporter: no input! **` }
   );
-  return infoOk && reportDiv.HTML.set(`<pre>${infoOk}</pre>`, true) || void(0);
+  return infoOk && reportDiv.append(`<pre>${infoOk}</pre>`) || void(0);
 }
 
 function styleDocument() {

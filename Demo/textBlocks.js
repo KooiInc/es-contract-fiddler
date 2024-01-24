@@ -230,13 +230,14 @@ export default {
   reporterFn: [`!!<h3>System</h3>`,
     `<pre class="line-numbers language-javascript">
 <code class=" line-numbers language-javascript">
-const reportDiv = $.div({id:"ViolationsReport"}).append(&lt;h3>All logged contract violations&lt;/h3>");
+const reportDiv = $.div({id:"ViolationsReport"})
+  .append("&lt;h3>All logged contract violations&lt;/h3>");
 // [...]
 function demoReporter(violationInfo) {
   const infoOk = contracts.plainString(
     violationInfo,
     { extraInfo: \`\\n  ** Origin demo.js/demoReporter: no input! **\` }
   );
-  return infoOk && reportDiv.append(\`&lt;pre>\${infoOk}&lt;/pre>\`) || void(0);
+  return infoOk && reportDiv.append("&lt;pre>\${infoOk}&lt;/pre>") || void(0);
 }</code></pre>`],
 };

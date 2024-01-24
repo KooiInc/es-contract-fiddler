@@ -17,7 +17,7 @@ export default {
    * const { contracts, IS } = contractFactory({
    *   [reporter]: Function                      // the function to use for
    *                                             // reporting contract violations
-   *                                             // default: log to console
+  *                                              // default violationInfo => console.info(violationInfo))
    *   [logViolations]: boolean (default false), // log violations by default
    *                                             // using [reporter]
    *                                             // (otherwise log per contract)
@@ -39,7 +39,7 @@ export default {
    *   method: Function,                    // a named or anonymous function
    *   expected: string || Function,        // for reporting
    *   [reportFn]: Function                 // the method for reporting
-   *                                        // default violationInfo => console.info(violationInfo))
+   *                                        // override the factory [reporter]
    *   [reportViolationsByDefault]: boolean // always report violations, default false
    *   [customReport]: Function             // a custom reporting function
    *   [defaultValue]: any,                 // if the contract is violated, return [defaultValue]
@@ -224,5 +224,14 @@ export default {
       This library enables a programmer to create contracts for variables to use in code.<br>
       See the console for the messaging from contract violations in the examples.<br>
       Click "Open explainer" to open explanation and code for the contracts used in this demo.<br>
-    </div>`
+    </div>`,
+  reporterFn: [`!!<h3>System</h3>`,
+    `<pre class="line-numbers language-javascript">
+<code class=" line-numbers language-javascript">function demoReporter(violationInfo) {
+  const infoOk = contracts.plainString(
+    violationInfo,
+    { extraInfo: \`\\n  ** Origin demo.js/demoReporter: no input! **\` }
+  );
+  return infoOk && reportDiv.HTML.set(\`&lt;pre>\${infoOk}&lt;/pre>\`, true) || void(0);
+}</code></pre>`],
 };

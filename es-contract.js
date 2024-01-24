@@ -46,7 +46,7 @@ function createContractMethod( params = destructuredPresets.createContract ) {
   return function(value, ...args) {
     let resolved = method(value, ...args);
     const argsWithValue = IS(args[0], Object) && {...args[0], value} || {value};
-    reportFn = reportFn ?? defaultViolationReporter;
+    reportFn = reportFn ?? reporter ?? defaultViolationReporter;
     
     if (IS(customReport, Function)) { customReport(argsWithValue); }
     
@@ -152,14 +152,17 @@ function addFactoryContracts( contracts ) {
 }
 
 function getViolationReport( params = destructuredPresets.reportViolations ) {
-  const {inputValue, defaultValue, shouldBe, fnName } = params;
+  const { inputValue, defaultValue, shouldBe, fnName } = params;
   const sorryDave = lang.report_sorry(fnName, formatInput(inputValue));
-  const noInput = isNothing(inputValue);
   const forValue =  lang.report_forValue(sorryDave);
   const itIsNot = lang.report_Expected(shouldBe);
   const defaultVal = lang.report_defaultValue(isNothing(defaultValue), defaultValue);
   
-  return `${forValue}${itIsNot}${defaultVal}`;
+  return indent(`${forValue}${itIsNot}${defaultVal}`);
+}
+
+function indent(str, n = 3) {
+  return str.replace(/\n/g, `\n${` `.repeat(n)}`);
 }
 
 function isNothing(val) {

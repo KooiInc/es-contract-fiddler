@@ -12,21 +12,10 @@ import auxText from "./textBlocks.js";
 const reportDiv = $(`<div id="ViolationsReport">`);
 styleDocument();
 addContracts4Demo(contracts);
-demoReporter();
 createHeaderAndExplanation();
 createHandling();
 createDemo();
 Prism.highlightAll();
-
-function demoReporter(violationInfo) {
-  if (contracts.plainString(violationInfo, {extraInfo: `\n  **Origin demo.js/demoReporter**`})) {
-    reportDiv.HTML.set(`<pre>${formatViolationForHtml(violationInfo)}</pre>`, true);
-  }
-}
-
-function formatViolationForHtml(violationInfo) {
-  return violationInfo.replace(/✘/, `  ✘`  ).replace(/\n\s+/g, `\n     `);
-}
 
 function addContracts4Demo(contracts) {
   const { addContracts: addAll } = contracts;
@@ -44,11 +33,11 @@ function addContracts4Demo(contracts) {
     },
     myObject: {
       method: myObject,
-      expected: `Your input is not {hello, world, universe}`,
+      expected: `Your input is not { hello, world, universe }`,
     },
     plainString: {
       method: plainString,
-      expected({extraInfo}) { return `Your input is not a string ${extraInfo ?? ``}`; },
+      expected({extraInfo}) { return `Your input is not a string ${extraInfo ?  `\n${extraInfo}` : ``}`; },
       reportViolationsByDefault: true
     },
     int: {
@@ -69,8 +58,8 @@ function addContracts4Demo(contracts) {
       customReport({value, numerator, denominator} = {}) {
         if ( !isFinite( (value ?? numerator)/(denominator ?? 0) ) ) {
           demoReporter(`✘ Contract violation for divide`+
-            `\n   [input: ${value ?? numerator} / denominator: ${denominator}] is not finite.` +
-            `\n   The denominator was 0, so divided the numerator (${
+            `\n[input: ${value ?? numerator} / denominator: ${denominator}] is not finite.` +
+            `\nThe denominator was 0, so divided the numerator (${
               value}) by (the default value) 1`);
         }
       },
@@ -163,13 +152,14 @@ function createHeaderAndExplanation() {
       >Github</a>`;
   print(`${auxText.HeaderText(sbLink, githubLink)}
     <p><button class="explainer closed">explainer</button>
-    <button class="showViolations">Show contract violations</button></p>
+    <button class="showViolations">Show contract violation logs</button></p>
     ${auxText.explainerText}`);
 }
 
 function createHandling() {
-  $.delegate( `click`, `.showViolations`, () => $.Popup.show({ content: reportDiv.HTML.get() }) );
-  $.delegate(`click`, `.explainer`, (evt, self) => {
+  $.delegate( `click`, `.showViolations`, () =>
+    $.Popup.show({ content: `<div class="violationPopup">${reportDiv.HTML.get()}</div>` }) );
+  $.delegate(`click`, `.explainer`, (_, self) => {
     const closed = `closed`;
     if (self.hasClass(`closed`)) {
       self.removeClass(`closed`);
@@ -182,6 +172,10 @@ function createHandling() {
 
 function createDemo() {
   print(`!!<h2>Examples</h2>`);
+  // 'system'
+  print(auxText.reporterFn.join(``),
+    `Contracts added, testing demoReporter without input: <code class="inline">demoReporter()</code>
+    <br> => ${demoReporter()} (see contract violation logs)`);
   
   // plainString
   print(`!!<h3>Contract: plainString</h3>`,`${toCode("contracts.plainString(`hello`)")}<br>=> ${
@@ -193,6 +187,9 @@ function createDemo() {
   print(`${toCode("contracts.plainString([1,2,3])")} => ${contracts.plainString([1,2,3])}`);
   print(`${toCode("contracts.plainString([1,2,3], {defaultValue: `Nothing`, reportViolation: true})")}<br>=> ${
     contracts.plainString([1,2,3], {defaultValue: `Nothing`, reportViolation: true})}`);
+  print(`${
+    toCode("contracts.plainString(undefined, {extraInfo: `**Logged by the 'expected' function in contracts.plainString**`})")}
+    <br>=> ${contracts.plainString(undefined, {extraInfo: `**Logged by the 'expected' function in contracts.plainString**`})}`);
   
   // int
   print(`!!<h3>Contract: int</h3>`, `${toCode("contracts.int(42)")}<br>=> ${contracts.int(42)}`);
@@ -300,10 +297,23 @@ function createDemo() {
   );
   
   try {
-    const num = contracts.numberBetween(100, {min: 150, max: 1200, inclusive: true, shouldThrow: true});
+    return contracts.numberBetween(100, {min: 150, max: 1200, inclusive: true, shouldThrow: true});
   } catch(err) {
     console.error([err.name, err.stack.replace(`${err.name}: `, ``)].join(`\n`));
     print(`!!=> <b class="warn">${err.name} thrown</b><pre class="noTopMargin">${err.message}</pre>`); }
+}
+
+function traceMe() {
+  try { throw new Error(`probed`); }
+  catch(err) { console.log( err.stack ); }
+}
+
+function demoReporter(violationInfo) {
+  const infoOk = contracts.plainString(
+    violationInfo,
+    { extraInfo: `** Origin demo.js/demoReporter: no input! **` }
+  );
+  return infoOk && reportDiv.HTML.set(`<pre>${infoOk}</pre>`, true) || void(0);
 }
 
 function styleDocument() {
@@ -343,7 +353,6 @@ function styleDocument() {
       color: revert;
       max-width: 90%;
     }`,
-    `.violation { margin-top: -0.8rem; }`,
     `button.explainer {
       font-weight: bold;
       cursor: pointer;
@@ -367,6 +376,7 @@ function styleDocument() {
     `.violationReport {
       padding: 1.3rem;
     }`,
+    `.violationPopup { padding: 0 1rem; }`,
     `.explainerCode {
       max-height: calc(100% - 1px);
       max-width: calc(100% - 1px);

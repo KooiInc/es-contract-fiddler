@@ -58,8 +58,8 @@ function addContracts4Demo(contracts) {
       customReport({value, numerator, denominator} = {}) {
         if ( !isFinite( (value ?? numerator)/(denominator ?? 0) ) ) {
           demoReporter(`✘ Contract violation for divide`+
-            `\n[input: ${value ?? numerator} / denominator: ${denominator}] is not finite.` +
-            `\nThe denominator was 0, so divided the numerator (${
+            `\n   [input: ${value ?? numerator} / denominator: ${denominator}] is not finite.` +
+            `\n   The denominator was 0, so divided the numerator (${
               value}) by (the default value) 1`);
         }
       },
@@ -311,9 +311,9 @@ function traceMe() {
 function demoReporter(violationInfo) {
   const infoOk = contracts.plainString(
     violationInfo,
-    { extraInfo: `** Origin demo.js/demoReporter: no input! **` }
+    { extraInfo: `** Origin demo.js/demoReporter **` }
   );
-  return infoOk && reportDiv.append(`<pre>${infoOk}</pre>`) || void(0);
+  return infoOk ? reportDiv.append($.pre(infoOk)) : undefined;
 }
 
 function styleDocument() {

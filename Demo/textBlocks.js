@@ -1,3 +1,5 @@
+import {$} from "./helpers.bundled.js";
+
 export default {
   explainerText: `<pre class="line-numbers language-javascript explainerCode closed">
   <code class=" line-numbers language-javascript">/**
@@ -236,8 +238,9 @@ const reportDiv = $.div({id:"ViolationsReport"})
 function demoReporter(violationInfo) {
   const infoOk = contracts.plainString(
     violationInfo,
-    { extraInfo: \`\\n  ** Origin demo.js/demoReporter: no input! **\` }
+    { extraInfo: "** Origin demo.js/demoReporter **" }
   );
-  return infoOk && reportDiv.append("&lt;pre>\${infoOk}&lt;/pre>") || void(0);
+  
+  return infoOk ? reportDiv.append($.pre(infoOk)) : undefined;
 }</code></pre>`],
 };

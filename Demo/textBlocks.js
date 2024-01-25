@@ -69,6 +69,8 @@ export default {
     numberBetween: {
       method: numberBetween,
       expected({min, max, inclusive} = {}) {
+      //        ^ note: arguments from the call are always passed for reporting violations
+      //        ^ e.g. contracts.numberBetween(42, {min: 1, max: 42, inclusive: true})
         min = inclusive && min !== Number.MIN_SAFE_INTEGER ? min - 1 : min;
         max = inclusive && max !== Number.MAX_SAFE_INTEGER ? max + 1 : max;
         return \`Your input should be a number between \${min} and \${max}\`;
@@ -81,9 +83,15 @@ export default {
     plainString: {
       method: plainString,
       expected({extraInfo}) { return \`Your input is not a string \${extraInfo ?  \`\\n\${extraInfo}\` : ""}\`; },
-      //       ^ note: custom arguments are always passed for reporting from the call
+      //       ^ note: custom arguments from the call are always passed for reporting violations
       //         e.g. contracts.plainString(null, {extraInfo: "O no! Null did not work!"})
       reportViolationsByDefault: true
+    },
+    arrayOfNumbers: {
+      method: arr => IS(arr, Array) && arr.length && !arr.find(v => !IS(v, Number)) ? arr : undefined,
+      expected({origin}) { return \`Your input is not an array containing *only* numbers, and *at least* one number  ${
+    origin ? `\\n\${origin}` : ``}\`; },
+      reportViolationsByDefault: true,
     },
     int: {
       method(nr) { return IS(nr, Number) && isFinite(nr) && nr % 1 === 0 && nr || undefined; },

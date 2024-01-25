@@ -53,7 +53,12 @@ function addContracts4Demo(contracts) {
       method: str => contracts.plainString(str) && str.length > 0,
       expected: `Your input is not a non empty string`,
     },
-    
+    arrayOfNumbers: {
+      method: arr => IS(arr, Array) && arr.length && !arr.find(v => !IS(v, Number)) ? arr : undefined,
+      expected({origin}) { return `Your input is not an array containing *only* numbers, and *at least* one number  ${
+        origin ?  `\n${origin}` : ``}`; },
+      reportViolationsByDefault: true,
+    },
     divide: {
       customReport({value, numerator, denominator} = {}) {
         if ( !isFinite( (value ?? numerator)/(denominator ?? 0) ) ) {
@@ -205,13 +210,30 @@ function createDemo() {
     [undefined,,,1].flat().map(v => !v && `nada` || v)}]`)
   
   // number
-  print(`!!<h3>Contract: number</h3>`, `${toCode("contracts.number()")} => ${contracts.number()}`);
+  print(`!!<h3>Contract: number</h3>`, `${toCode("contracts.number()")}<br>=> ${contracts.number()}`);
   print(`${toCode("contracts.number(undefined, {defaultValue: 42, reportViolation: true})")}<br>=> ${
     contracts.number(undefined, {defaultValue: 42, reportViolation: true})}`);
   print(`${toCode("contracts.number(13.22)")}<br>=> ${contracts.number(13.22)}`);
   print(`${toCode("[1,2,3,4,`not number`,41.9999,5].filter(contracts.number)")}<br>=> [${
     [1,2,3,4,`not number`,41.9999,5].filter(contracts.number)}]`);
   
+  // arrayOfNumber
+  const origin4Log = { origin: `** from demo contract.arrayOfNumbers **` };
+  print(`!!<h3>Contract: arrayOfNumbers</h3>
+    <div><b>Note</b>: Violations logged with [origin4Log]: ${
+      toCode("{origin: `** from demo contract.arrayOfNumbers **`}")}</div>`,
+    `${toCode("contracts.arrayOfNumbers()")}<br>=> ${
+    contracts.arrayOfNumbers()}`);
+  print(`${toCode("contracts.arrayOfNumbers([], origin4Log)")}<br>=> ${
+    contracts.arrayOfNumbers([], origin4Log)}`);
+  print(`${toCode("contracts.arrayOfNumbers([10, 1000, 3], origin4Log)")}
+    <br>=> [${contracts.arrayOfNumbers([10, 1000, 3], origin4Log)}]`);
+  print(`${
+    toCode("contracts.arrayOfNumbers([10, \"1000\", 3], origin4Log)")}
+    <br>=> ${contracts.arrayOfNumbers([10, "1000", 3], origin4Log)}`);
+  print(`${
+    toCode("contracts.arrayOfNumbers({0: 1, 1: 2, 2: 3}, origin4Log)")}
+    <br>=> ${contracts.arrayOfNumbers({0: 1, 1: 2, 2: 3}, origin4Log)}`);
   
   // objects
   const obj1 = toCode("contracts.myObject({hello: `hello`, world: `world`, universe: `universe`})");

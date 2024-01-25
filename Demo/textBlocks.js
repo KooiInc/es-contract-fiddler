@@ -80,7 +80,10 @@ export default {
     },
     plainString: {
       method: plainString,
-      expected: "Your input is not a string",
+      expected({extraInfo}) { return \`Your input is not a string \${extraInfo ?  \`\\n\${extraInfo}\` : ""}\`; },
+      //       ^ note: custom arguments are always passed for reporting from the call
+      //         e.g. contracts.plainString(null, {extraInfo: "O no! Null did not work!"})
+      reportViolationsByDefault: true
     },
     int: {
       method(nr) { return IS(nr, Number) && isFinite(nr) && nr % 1 === 0 && nr || undefined; },

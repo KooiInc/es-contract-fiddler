@@ -13,7 +13,8 @@ export default {
     report_forValue: sorryDave => `${sorryDave}`,
     report_Expected: shouldBe => `\n${shouldBe}`,
     report_defaultValue: (hasValue, defaultValue) => !hasValue
-      ? `\nUsing the assigned default value (${defaultValue}) instead` : ``,
+      ? `\nUsing the assigned default value (${
+        IS(defaultValue, String) ? `"${defaultValue}"` : defaultValue}) instead` : ``,
   },
   NL: {
     unknownOrNa: `onbekend of nvt`,
@@ -30,6 +31,6 @@ export default {
     report_Expected: shouldBe => `\n${shouldBe}`,
     report_defaultValue: (hasValue, defaultValue) => !hasValue
       ? `\nIn plaats daarvan wordt de voor dit contract toegekende standaardwaarde (${
-        defaultValue}) gebruikt` : ``,
+        IS(defaultValue, String) ? `"${defaultValue}"` : defaultValue}) gebruikt` : ``,
   }
 }

@@ -88,7 +88,7 @@ function addContracts4Demo(contracts) {
           : IS(den, undefined, null, NaN)
             ? `the denominator has no value`
             : `insufficient input (should be array of 2 numbers)`;
-        return `${prefix}. Cause: ${message}`;
+        return `${prefix}\nCause: ${message}`;
       },
     },
     myTypedObject: {

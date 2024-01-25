@@ -65,7 +65,9 @@ export default {
   contracts.addContracts( {
     number: {
       method: function number(nr) { return IS(nr, Number) && isFinite(nr) ? nr : undefined; },
-      expected: "a number (integer or float)", },
+      expected({origin}) {
+        return \`Your input should be a number (integer or float) \${origin ? \`\\n\${origin}\` : ""}\`;
+      }, },
     numberBetween: {
       method: numberBetween,
       expected({min, max, inclusive} = {}) {

@@ -182,11 +182,13 @@ function formatInput(inputValue) {
   const arrayMapper = v =>
     IS(v, String) ? `"${v}"` :
       IS(v, Object) ? tryJSON(v) : String(v);
-  return IS(inputValue, Object)
-    ? tryJSON(inputValue)
-    : /Array\(/.test(inputValue?.constructor.toString())
-      ? `[${[...inputValue].map(arrayMapper)}]`
-      : String(inputValue);
+  return IS(inputValue, String)
+    ? `"${inputValue}"`
+    : IS(inputValue, Object)
+      ? tryJSON(inputValue)
+      : /Array\(/.test(inputValue?.constructor.toString())
+        ? `[${[...inputValue].map(arrayMapper)}]`
+        : String(inputValue);
 }
 
 function defaultViolationReporter(violationInfo) {

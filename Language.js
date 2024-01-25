@@ -9,7 +9,7 @@ export default {
       `{ [contractName]: { method: Function, expected: String|Function } }`,
     addContract_Contract_Expected: `addContract parameters should at least be {name, method, expected}` +
       `\n(when method is a named function, the name was derived from that)`,
-    report_sorry: (fnName, inputValue) => `✘ Contract violation for [${fnName}], input ${inputValue}`,
+    report_sorry: (fnName, inputValue) => `✘ Contract violation for contract [${fnName}], input ${inputValue}`,
     report_forValue: sorryDave => `${sorryDave}`,
     report_Expected: shouldBe => `\n${shouldBe}`,
     report_defaultValue: (hasValue, defaultValue) => !hasValue
@@ -26,7 +26,7 @@ export default {
       `{ [contractName]: { method: Function, expected: String|Function } } zijn`,
     addContract_Contract_Expected: `De invoer vooor [addContract] moet tenminste {name, method, expected} zijn` +
       `\n(wanneer de eigenschap [method] een functie met naam was wordt [name] daarvan afgeleid)`,
-    report_sorry: (fnName, inputValue) => `✘ Contractbreuk voor [${fnName}], input ${inputValue}`,
+    report_sorry: (fnName, inputValue) => `✘ Contractbreuk voor contract [${fnName}], input ${inputValue}`,
     report_forValue: sorryDave => `${sorryDave}`,
     report_Expected: shouldBe => `\n${shouldBe}`,
     report_defaultValue: (hasValue, defaultValue) => !hasValue

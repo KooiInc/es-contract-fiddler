@@ -22,7 +22,9 @@ function addContracts4Demo(contracts) {
   const allContracts = {
     number: {
       method: function number(nr) { return IS(nr, Number) && isFinite(nr) ? nr : undefined; },
-      expected: `Your input should be a number (integer or float)`, },
+      expected({origin}) {
+        return `Your input should be a number (integer or float) ${origin ? `\n${origin}` : ``}`;
+      }, },
     numberBetween: {
       method: numberBetween,
       expected({min, max, inclusive} = {}) {
@@ -214,8 +216,12 @@ function createDemo() {
   print(`${toCode("contracts.number(undefined, {defaultValue: 42, reportViolation: true})")}<br>=> ${
     contracts.number(undefined, {defaultValue: 42, reportViolation: true})}`);
   print(`${toCode("contracts.number(13.22)")}<br>=> ${contracts.number(13.22)}`);
-  print(`${toCode("[1,2,3,4,`not number`,41.9999,5].filter(contracts.number)")}<br>=> [${
-    [1,2,3,4,`not number`,41.9999,5].filter(contracts.number)}]`);
+  print(`${
+    toCode("[1,2,3,4,`not number`,41.9999,5].filter(v => " +
+      "<br>&nbsp;&nbsp;contracts.number(v, {origin: `** from array filter lambda **`, reportViolation: true: true})")}
+    <br>=> [${
+    [1,2,3,4,`not number`,41.9999,5].filter(v =>
+      contracts.number(v, {origin: `** from array filter lambda **`, reportViolation: true}))}]`);
   
   // arrayOfNumber
   const origin4Log = { origin: `** from demo contract.arrayOfNumbers **` };

@@ -3,7 +3,7 @@ import language from "./Language.js";
 export default typeContractFactory;
 
 const destructuredPresets = getParams4Destructuring();
-const localFactoryCheckMethods = getFactoryChecks();
+const localFactoryContracts = getFactoryContracts();
 const lang = language.EN;
 
 function typeContractFactory({reporter = defaultViolationReporter, logViolations = false, alwaysThrow = false} = {}) {
@@ -27,7 +27,7 @@ function typeContractFactory({reporter = defaultViolationReporter, logViolations
       shouldThrow, reportViolationsByDefault, paramsChecked } = params;
     name = name || method?.name;
     const addContract_Contract = contracts.addContract_Contract ||
-      localFactoryCheckMethods.checkSingleContractParameters;
+      localFactoryContracts.checkSingleContractParameters;
     
     if (!paramsChecked && !addContract_Contract({name, method, expected})) { return; }
     
@@ -99,7 +99,7 @@ function getParams4Destructuring() {
   }
 }
 
-function getFactoryChecks() {
+function getFactoryContracts() {
   const nameOk = name => IS(name, String) && name.trim().length;
   const expectedOk = expected => IS(expected, String) && expected.length || IS(expected, Function);
   const isMethod = method => IS(method, Function);
@@ -112,7 +112,7 @@ function getFactoryChecks() {
 }
 
 function addFactoryContracts( contracts ) {
-  const {nameOk, expectedOk, isMethod, checkSingleContractParameters} = localFactoryCheckMethods;
+  const {nameOk, expectedOk, isMethod, checkSingleContractParameters} = localFactoryContracts;
   contracts.addContract({
     method: nameOk,
     expected: lang.nameOkExpected,

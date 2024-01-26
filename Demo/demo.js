@@ -90,13 +90,15 @@ function addContracts4Demo(contracts) {
         const [num, den] = value;
         const divisionText = `${num} / ${den}`;
         const prefix = `The result of [${divisionText}] is not finite`;
-        const message = IS(num, undefined, null, NaN)
-          ? `the numerator has no value`
-          : IS(den, undefined, null, NaN)
-            ? `the denominator has no value`
-            : IS(den, Number) && den === 0
-              ? "The denominator can not be zero (0)"
-              : `insufficient input (should be array of 2 numbers)`;
+        const message = IS(num, undefined, null, NaN) && IS(den, undefined, null, NaN)
+          ? "both numerator and denominator lack a value"
+            : IS(num, undefined, null, NaN)
+              ? `the numerator has no value`
+              : IS(den, undefined, null, NaN)
+                ? `the denominator has no value`
+                : IS(den, Number) && den === 0
+                  ? "The denominator can not be zero (0)"
+                  : `insufficient input (should be array of 2 numbers)`;
         return `${prefix}\nCause: ${message}`;
       },
     },

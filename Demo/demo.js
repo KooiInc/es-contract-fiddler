@@ -2,7 +2,7 @@ import contractFactory from "../es-contract.js";
 import {logFactory, $} from "./helpers.bundled.js";
 const isSB = /stackblitz/i.test(location.href);
 const { log:print } = logFactory();
-isSB && console.clear();
+!isSB && console.clear();
 const toCode = str => `<code class="inline">${str}</code>`;
 const {contracts, IS,} = contractFactory({reporter: demoReporter});
 const world4TemplateString = `world`;

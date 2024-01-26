@@ -3,7 +3,7 @@ import language from "./Language.js";
 export default typeContractFactory;
 
 const destructuredPresets = getParams4Destructuring();
-const localFactoryContracts = getFactoryContracts();
+const localFactoryContracts = getFactoryContractCheckMethods();
 const lang = language.EN;
 
 function typeContractFactory({reporter = defaultViolationReporter, logViolations = false, alwaysThrow = false} = {}) {
@@ -99,7 +99,7 @@ function getParams4Destructuring() {
   }
 }
 
-function getFactoryContracts() {
+function getFactoryContractCheckMethods() {
   const nameOk = name => IS(name, String) && name.trim().length;
   const expectedOk = expected => IS(expected, String) && expected.length || IS(expected, Function);
   const isMethod = method => IS(method, Function);

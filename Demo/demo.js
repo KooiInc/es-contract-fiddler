@@ -331,11 +331,6 @@ function createDemo() {
     print(`!!=> <b class="warn">${err.name} thrown</b><pre class="noTopMargin">${err.message}</pre>`); }
 }
 
-function traceMe() {
-  try { throw new Error(`probed`); }
-  catch(err) { console.log( err.stack ); }
-}
-
 function demoReporter(violationInfo) {
   const infoOk = contracts.plainString(
     violationInfo,

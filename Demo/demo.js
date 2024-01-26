@@ -84,7 +84,7 @@ function addContracts4Demo(contracts) {
         value = IS(value, Array) && [...value.values()] || [];
         
         if (value.length < 2) {
-          value = [...Array(2)].map((v, i) => {value?.[i]});
+          value = [...Array(2)].map( (v, i) => value?.[i] );
         }
         
         const [num, den] = value;
@@ -126,7 +126,7 @@ function addContracts4Demo(contracts) {
     value = IS(value, Array) && [...value.values()] || [];
     
     if (value.length < 2) {
-      value = [...Array(2)].map((_, i) => {value?.[i]});
+      value = [...Array(2)].map((_, i) => value?.[i]);
     }
     const [numerator, denominator] = value;
     const result = numerator/denominator;

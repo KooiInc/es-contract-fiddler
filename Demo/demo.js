@@ -94,7 +94,9 @@ function addContracts4Demo(contracts) {
           ? `the numerator has no value`
           : IS(den, undefined, null, NaN)
             ? `the denominator has no value`
-            : `insufficient input (should be array of 2 numbers)`;
+            : IS(den, Number) && den === 0
+              ? "The denominator can not be zero (0)"
+              : `insufficient input (should be array of 2 numbers)`;
         return `${prefix}\nCause: ${message}`;
       },
     },
@@ -128,9 +130,11 @@ function addContracts4Demo(contracts) {
     if (value.length < 2) {
       value = [...Array(2)].map((_, i) => value?.[i]);
     }
+    
     const [numerator, denominator] = value;
-    const result = numerator/denominator;
-    return !isFinite(result) ? undefined : result;
+    const denominatorIsZero = IS(denominator, Number) && denominator === 0;
+    const result = denominatorIsZero ? undefined : numerator/denominator;
+    return isFinite(result) ? result : undefined;
   }
   
   function plainString(value) {

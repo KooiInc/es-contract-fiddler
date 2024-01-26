@@ -141,6 +141,8 @@ export default {
           ? "the numerator has no value"
           : IS(den, undefined, null, NaN)
             ? "the denominator has no value"
+            : IS(den, Number) && den === 0
+              ? "The denominator can not be zero (0)"
               : "insufficient input (should be array of 2 numbers)";
         return \`\${prefix}. Cause: \${message}\`;
       },

@@ -3,7 +3,7 @@ import language from "./Language.js";
 export default typeContractFactory;
 
 const destructuredPresets = getParams4Destructuring();
-const localFactoryContracts = getFactoryContractCheckMethods();
+const localFactoryContractMethods = getFactoryContractCheckMethods();
 const lang = language.EN;
 
 function typeContractFactory({reporter = defaultViolationReporter, logViolations = false, alwaysThrow = false} = {}) {
@@ -27,7 +27,7 @@ function typeContractFactory({reporter = defaultViolationReporter, logViolations
       shouldThrow, reportViolationsByDefault, paramsChecked } = params;
     name = name || method?.name;
     const addContract_Contract = contracts.addContract_Contract ||
-      localFactoryContracts.checkSingleContractParameters;
+      localFactoryContractMethods.checkSingleContractParameters;
     
     if (!paramsChecked && !addContract_Contract({name, method, expected})) { return; }
     
@@ -112,7 +112,7 @@ function getFactoryContractCheckMethods() {
 }
 
 function addFactoryContracts( contracts ) {
-  const {nameOk, expectedOk, isMethod, checkSingleContractParameters} = localFactoryContracts;
+  const {nameOk, expectedOk, isMethod, checkSingleContractParameters} = localFactoryContractMethods;
   contracts.addContract({
     method: nameOk,
     expected: lang.nameOkExpected,

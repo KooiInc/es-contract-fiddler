@@ -1,5 +1,3 @@
-import {$} from "./helpers.bundled.js";
-
 export default {
   explainerText: `<pre class="line-numbers language-javascript explainerCode closed">
   <code class=" line-numbers language-javascript">/**
@@ -66,7 +64,7 @@ export default {
     number: {
       method: function number(nr) { return IS(nr, Number) && isFinite(nr) ? nr : undefined; },
       expected({origin}) {
-        return \`Your input should be a number (integer or float) \${origin ? \`\\n\${origin}\` : ""}\`;
+        return \`Inuput should be a number (integer or float) \${origin ? \`\\n\${origin}\` : ""}\`;
       }, },
     numberBetween: {
       method: numberBetween,
@@ -75,46 +73,49 @@ export default {
       //        ^ e.g. contracts.numberBetween(42, {min: 1, max: 42, inclusive: true})
         min = inclusive && min !== Number.MIN_SAFE_INTEGER ? min - 1 : min;
         max = inclusive && max !== Number.MAX_SAFE_INTEGER ? max + 1 : max;
-        return \`Your input should be a number between \${min} and \${max}\`;
+        return \`Inuput should be a number between \${min} and \${max}\`;
       },
     },
     myObject: {
       method: myObject,
-      expected: "Your input is not {hello, world, universe}",
+      expected: "Inuput is not {hello, world, universe}",
     },
     plainString: {
       method: plainString,
-      expected({extraInfo}) { return \`Your input is not a string \${extraInfo ?  \`\\n\${extraInfo}\` : ""}\`; },
+      expected({extraInfo}) { return \`Inuput is not a string \${extraInfo ?  \`\\n\${extraInfo}\` : ""}\`; },
       //       ^ note: custom arguments from the call are always passed for reporting violations
       //         e.g. contracts.plainString(null, {extraInfo: "O no! Null did not work!"})
       reportViolationsByDefault: true
     },
     arrayOfNumbers: {
       method: arr => IS(arr, Array) && arr.length && !arr.find(v => !IS(v, Number)) ? arr : undefined,
-      expected({origin}) { return \`Your input is not an array containing *only* numbers, and *at least* one number  ${
+      expected({origin}) { return \`Inuput is not an array containing *only* numbers, and *at least* one number  ${
     origin ? `\\n\${origin}` : ``}\`; },
       reportViolationsByDefault: true,
     },
     int: {
       method(nr) { return IS(nr, Number) && isFinite(nr) && nr % 1 === 0 && nr || undefined; },
-      expected: "Your input is not an integer",
+      expected: "Inuput is not an integer",
     },
     numberNotZero: {
       method(nr) { return IS(nr, Number) && isFinite(nr) && nr !== 0 && nr || undefined},
-      expected: "Your input is not number < 0 or number > 0",
+      expected: "Inuput is not number < 0 or number > 0",
       defaultValue: 1,
     },
     stringNotEmpty: {
       method: str => contracts.plainString(str) && str.length > 0,
-      expected: "Your input is not a non empty string",
+      expected: "Inuput is not a non empty string",
      },
+    
     divide: {
       customReport({value, numerator, denominator} = {}) {
         if ( !isFinite( (value ?? numerator)/(denominator ?? 0) ) ) {
-          console.info("✘ (contracts.divide) I'm sorry Dave" +
-            \`\\n   [input: \${value ?? numerator} / denominator: \${denominator}] is not finite.\` +
-            \`\\n   The denominator was 0, so divided the numerator (\${
-              value}) by (the default value) 1\`);
+          demoReporter(
+            [\`✘ Contract violation for contract divide\`,
+              \`[input: \${value ?? numerator} / denominator: \${denominator}] is not finite.\`,
+              \`The denominator was 0, so divided the numerator (\${value}) by (the default value) 1\`]
+            .join(\`\\n   \`)
+          );
         }
       },
       method(value, {numerator, denominator} = {}) {
@@ -165,7 +166,7 @@ export default {
       expected() {
         return !(contracts.int && contracts.plainString)
           ? "myTypedObject uses contracts.int an contracts.plainString, which are not assigned!"
-          : "Your input is not {first: String, second: integer}"
+          : "Inuput is not {first: String, second: integer}"
       }
     }
   } );
@@ -241,8 +242,10 @@ export default {
       </div>
     </div>
     <div>
-      This library enables a programmer to create contracts for variables to use in code.<br>
-      See the console for the messaging from contract violations in the examples.<br>
+      This library enables a programmer to create contracts for variables to use in code.
+      <br>For every contract created, violations may be reported (by default or on demand).
+      <br>Every contract therefore is/must be created including information about what was expected.<br>
+      In the examples, a custom violation reporting function is used.<br>
       Click "Open explainer" to open explanation and code for the contracts used in this demo.<br>
     </div>
     <div>The demo uses the <a target="_blank" href="//github.com/KooiInc/JQL"

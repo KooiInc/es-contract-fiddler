@@ -4,7 +4,7 @@ export default typeContractFactory;
 
 const destructuredPresets = getParams4Destructuring();
 const localFactoryContractMethods = getFactoryContractCheckMethods();
-const lang = language.EN;
+const lang = language(IS, tryJSON).EN;
 
 function typeContractFactory({reporter = defaultViolationReporter, logViolations = false, alwaysThrow = false} = {}) {
   const contracts = { addContract, addContracts };

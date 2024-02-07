@@ -36,6 +36,6 @@ export default function(IS, tryJSON) {
   };
   
   function getDefaultValue4Reporting(value) {
-    return IS(value, String) ? `"${value}"` : tryJSON(value);
+    return IS(value, String) ? `"${value}"` : IS(value, Number) ? value : tryJSON(value);
   }
 }

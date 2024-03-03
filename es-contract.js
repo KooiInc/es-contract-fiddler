@@ -1,12 +1,19 @@
 import IS from "./typofany.module.js";
-import language from "./Language.js";
+import languageFactory from "./Language.js";
+let lang;
+
 export default typeContractFactory;
 
 const destructuredPresets = getParams4Destructuring();
 const localFactoryContractMethods = getFactoryContractCheckMethods();
-const lang = language(IS, tryJSON).EN;
 
-function typeContractFactory({reporter = defaultViolationReporter, logViolations = false, alwaysThrow = false} = {}) {
+function typeContractFactory({
+    reporter = defaultViolationReporter,
+    logViolations = false,
+    alwaysThrow = false,
+    language = `EN`,
+    contractsPrefix } = {}) {
+  lang = languageFactory({IS, tryJSON, contractsPrefix})[language];
   const contracts = { addContract, addContracts };
   addFactoryContracts( contracts );
   

@@ -30,7 +30,7 @@ function addContracts4Demo(contracts) {
       expected({min, max, inclusive} = {}) {
         min = inclusive && min !== Number.MIN_SAFE_INTEGER ? min - 1 : min;
         max = inclusive && max !== Number.MAX_SAFE_INTEGER ? max + 1 : max;
-        return `Input should be a number between ${min} and ${max}`;
+        return `Input should be a number between (and not including) ${min} and ${max}`;
       },
     },
     myObject: {

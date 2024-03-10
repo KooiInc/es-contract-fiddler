@@ -7,17 +7,21 @@ export default typeContractFactory;
 const destructuredPresets = getParams4Destructuring();
 const localFactoryContractMethods = getFactoryContractCheckMethods();
 
-function typeContractFactory({
-    reporter = defaultViolationReporter,
-    logViolations = false,
-    alwaysThrow = false,
-    language = `EN`,
-    contractsPrefix } = {}) {
+function typeContractFactory(specs) {
+  initializeArguments(specs);
+  const { reporter, logViolations, alwaysThrow, language, contractsPrefix } = specs;
   lang = languageFactory({IS, tryJSON, contractsPrefix})[language];
   const contracts = { addContract, addContracts };
   addFactoryContracts( contracts );
   
   return Object.freeze({ contracts, IS, tryJSON });
+  
+  function initializeArguments(specs) {
+    specs.reporter = specs.reporter || defaultViolationReporter,
+    specs.logViolations = specs.logViolations || false,
+    specs.alwaysThrow = specs.alwaysThrow || false,
+    specs.language = specs.language || `EN`
+  }
   
   function addContracts(contractLiterals) {
     if (!contracts.addContracts_Contract(contractLiterals)) { return; }
@@ -59,8 +63,10 @@ function createContractMethod( params = destructuredPresets.createContract ) {
     
     if (isNothing(resolved)) {
       const expectedValue = IS(expected, Function) ? expected(argsWithValue) : expected;
+      
       resolved = !isNothing(argsWithValue.defaultValue) || defaultValue
-        ? (defaultValue || argsWithValue.defaultValue) : resolved;
+        ? (argsWithValue.defaultValue || defaultValue) : resolved;
+      
       const [doReport, throwIt] = [
         argsWithValue.reportViolation ?? reportViolationsByDefault,
         argsWithValue.shouldThrow ?? shouldThrow ];

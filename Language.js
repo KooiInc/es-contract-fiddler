@@ -17,7 +17,9 @@ export default function({ IS, tryJSON, contractsPrefix} = {}) {
       report_Expected: shouldBe => `\n${shouldBe}`,
       report_defaultValue: (hasValue, defaultValue) => !hasValue
         ? `\nUsing the contract default value (${
-          IS(defaultValue, String) ? `"${defaultValue}"` : tryJSON(defaultValue)}) instead` : ``,
+          IS(defaultValue, Function)
+            ? defaultValue.toString() : IS(defaultValue, String)
+              ? `"${defaultValue}"` : tryJSON(defaultValue)}) instead` : ``,
     },
     NL: {
       unknownOrNa: `onbekend of nvt`,
@@ -35,7 +37,9 @@ export default function({ IS, tryJSON, contractsPrefix} = {}) {
       report_Expected: shouldBe => `\n${shouldBe}`,
       report_defaultValue: (hasValue, defaultValue) => !hasValue
         ? `\nIn plaats daarvan wordt de voor dit contract toegekende standaardwaarde (${
-          IS(defaultValue, String) ? `"${defaultValue}"` : tryJSON(defaultValue)}) gebruikt` : ``,
+          IS(defaultValue, Function)
+            ? defaultValue.toString() : IS(defaultValue, String)
+              ? `"${defaultValue}"` : tryJSON(defaultValue)}) gebruikt` : ``,
     }
   }
 }

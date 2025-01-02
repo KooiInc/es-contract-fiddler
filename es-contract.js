@@ -54,6 +54,7 @@ function typeContractFactory(specs) {
 function createContractMethod( params = destructuredPresets.createContract ) {
   let { name, method, expected, defaultValue, customReport, reportFn, reporter,
     logViolations, shouldThrow, reportViolationsByDefault, alwaysThrow } = params;
+  
   return function(value, ...args) {
     let resolved = method(value, ...args);
     const argsWithValue = IS(args[0], Object) && {...args[0], value} || {value};
@@ -63,9 +64,8 @@ function createContractMethod( params = destructuredPresets.createContract ) {
     
     if (isNothing(resolved)) {
       const expectedValue = IS(expected, Function) ? expected(argsWithValue) : expected;
-      
-      resolved = !isNothing(argsWithValue.defaultValue) || defaultValue
-        ? (argsWithValue.defaultValue || defaultValue) : resolved;
+      let valueDefault = defaultValue ? defaultValue : argsWithValue.defaultValue;
+      resolved = !isNothing(valueDefault) ? valueDefault : resolved;
       
       const [doReport, throwIt] = [
         argsWithValue.reportViolation ?? reportViolationsByDefault,
@@ -86,7 +86,6 @@ function createContractMethod( params = destructuredPresets.createContract ) {
         reporter(aggregatedReport);
       }
     }
-    
     return resolved;
   };
 }
@@ -179,7 +178,8 @@ function indent(str, n = 3) {
 }
 
 function isNothing(val) {
-  return IS(val, undefined, null, NaN);
+  const isString = (typeof val === `string` && val.length > 0);
+  return !isString && IS(val, undefined, null, NaN);
 }
 
 function tryJSON(value) {

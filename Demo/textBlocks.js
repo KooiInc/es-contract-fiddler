@@ -94,7 +94,7 @@ export default {
       reportViolationsByDefault: true,
     },
     int: {
-      method(nr) { return IS(nr, Number) && isFinite(nr) && nr % 1 === 0 && nr || undefined; },
+      method(nr, {defaultValue} = {}) { return IS(nr, Number) && isFinite(nr) && nr % 1 === 0 && nr || defaultValue; },
       expected: "Inuput is not an integer",
     },
     numberNotZero: {

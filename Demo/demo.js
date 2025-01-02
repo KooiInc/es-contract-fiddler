@@ -4,14 +4,18 @@ const isSB = /stackblitz/i.test(location.href);
 const { log:print } = logFactory();
 !isSB && console.clear();
 const toCode = str => `<code class="inline">${str}</code>`;
+const cleanupFn = str => str.trim().replace(/ {3,}(\w)/g, `  $1`).replace(/\n +}$/, `\n}`).replace(`method`, `function`);
+const toFormattedCode = str => `!!
+  <pre class="line-numbers language-javascript explainerCode"><code class=" line-numbers language-javascript">${
+  cleanupFn(str)}</code></pre>`;
 const {contracts, IS,} = contractFactory({reporter: demoReporter});
 const world4TemplateString = `world`;
 window.contracts = contracts;
 window.IS = IS;
 import auxText from "./textBlocks.js";
-const reportDiv = $.div({id:`ViolationsReport`}).append(`<h3>All logged contract violations</h3>`);
+const reportDiv = $.div_jql({id:`ViolationsReport`}).append(`<h3>All logged contract violations</h3>`);
 styleDocument();
-addContracts4Demo(contracts);
+const allContracts = addContracts4Demo(contracts);
 createHeaderAndExplanation();
 createHandling();
 createDemo();
@@ -43,6 +47,7 @@ function addContracts4Demo(contracts) {
       reportViolationsByDefault: true
     },
     int: {
+      name: `int`,
       method(nr) { return IS(nr, Number) && isFinite(nr) && nr % 1 === 0 && nr || undefined; },
       expected: `Input is not an integer`,
     },
@@ -56,7 +61,9 @@ function addContracts4Demo(contracts) {
       expected: `Input is not a non empty string`,
     },
     arrayOfNumbers: {
-      method: arr => IS(arr, Array) && arr.length && !arr.find(v => !IS(v, Number)) ? arr : undefined,
+      method(arr) {
+        return IS(arr, Array) && arr.length && !arr.find(v => !IS(v, Number)) ? arr : undefined;
+      },
       expected({origin}) { return `Input is not an array containing *only* numbers, and *at least* one number  ${
         origin ?  `\n${origin}` : ``}`; },
       reportViolationsByDefault: true,
@@ -72,7 +79,7 @@ function addContracts4Demo(contracts) {
           );
         }
       },
-      method(value, {numerator, denominator} = {}) {
+      method: function(value, {numerator, denominator} = {}) {
         numerator = value ?? numerator;
         const result = numerator/denominator;
         return result === Infinity ? numerator/1 : result;
@@ -108,8 +115,7 @@ function addContracts4Demo(contracts) {
       method: function(obj) {
         const expected = {
           first: val => IS(contracts?.plainString(val), String),
-          second: val => contracts?.int(val),
-        };
+          second: val => contracts?.int(val), };
         const isObject = IS(obj, Object);
         const entries = Object.entries(isObject ? obj : {});
         const entriesLengthOk = entries.length === 2;
@@ -127,13 +133,12 @@ function addContracts4Demo(contracts) {
   };
   
   addAll(allContracts);
+  window.contracts = contracts;
   
   function divider(value) {
     value = IS(value, Array) && [...value.values()] || [];
     
-    if (value.length < 2) {
-      value = [...Array(2)].map((_, i) => value?.[i]);
-    }
+    if (value.length < 2) { value = [...Array(2)].map((_, i) => value?.[i]); }
     
     const [numerator, denominator] = value;
     const denominatorIsZero = IS(denominator, Number) && denominator === 0;
@@ -157,6 +162,7 @@ function addContracts4Demo(contracts) {
     Object.keys(obj).filter(k => keysExpected.indexOf(k) > -1).length === keysExpected.length
       ? obj : undefined;
   }
+  return allContracts;
 }
 
 function createHeaderAndExplanation() {
@@ -193,7 +199,9 @@ function createDemo() {
     <br> => ${demoReporter()} (see contract violation logs)`);
   
   // plainString
-  print(`!!<h3>Contract: plainString</h3>`,`${toCode("contracts.plainString(`hello`)")}<br>=> ${
+  print(`!!<h3>Contract: plainString</h3>`,
+    toFormattedCode(`// contracts.plainString method\n${String(allContracts.plainString.method).replace(`method`, `function`).trim()}`),
+    `${toCode("contracts.plainString(`hello`)")}<br>=> ${
     contracts.plainString(`hello`) }`);
   print(`${toCode("contracts.plainString(`hello ${world4TemplateString}`)")}<br>=> ${
     contracts.plainString(`hello ${world4TemplateString}`)}`);
@@ -207,20 +215,25 @@ function createDemo() {
     <br>=> ${contracts.plainString(undefined, {extraInfo: `**Logged by the 'expected' function in contracts.plainString**`})}`);
   
   // int
-  print(`!!<h3>Contract: int</h3>`, `${toCode("contracts.int(42)")}<br>=> ${contracts.int(42)}`);
+  print(`!!<h3>Contract: int</h3>`)
+  print(toFormattedCode(`// contracts.int method\n${
+    String(allContracts.int.method).replace(`method`, `function`).trim()}`));
+  print(`${toCode("contracts.int(42)")}<br>=> ${contracts.int(42)}`);
   print(`${toCode("contracts.int(42.1)")}<br>=> ${contracts.int(42.1)}`);
-  print(`${toCode("[1,2,3,4,`nothing`,41.999,5].filter(contracts.int)")}<br>=> [${
-    [1,2,3,4,`nothing`,41.999,5].filter(contracts.int)}]`);
-  print(`${toCode("[1,2,3,4,,`NADA`,,42.1,5].flat().filter(v => contracts.int(v, {defaultValue: 0}))")}<br>=> [${
-    [1,2,3,4,`NADA`,,,42.01,5].flat().map((v) => contracts.int(v, {defaultValue: 0}))}]
-    <br><b>Note</b>: <code class="inline">.flat()</code> because <code class="inline">Array.map</code>
-    does not process empty slots (and <code class="inline">.flat()</code> kills them)<br>&nbsp;&nbsp;e.g.${
-    toCode("[undefined,,,1].map(v => !v && `nada` || v)")} => [${[undefined,,,1].map(v => !v && `nada` || v)}]
-      <br>&nbsp;&nbsp;vs ${toCode("[undefined,,,1].flat().map(v => !v && `nada` || v)")} => [${
-    [undefined,,,1].flat().map(v => !v && `nada` || v)}]`)
+  print(`${toCode("[1,2,3,4,`nothing`,,,41.999,5].filter(contracts.int)")}<br>=> [${
+    [1,2,3,4,`nothing`,,,41.999,5].filter(contracts.int)}]`);
+  print(`${toCode("[...[1,2,,3,4,`NADA`,,42.1,5]].map(v => contracts.int(v, {defaultValue: `NaN`}))")}<br>=> [${
+    [...[1,2,,3,4,`NADA`,,,42.1,5]].map((v) => contracts.int(v, {defaultValue: `NaN`}))}]
+    <br><b>Note</b>: ${toCode(`Array.map`)} will not process empty slots of an array.
+    <br>${toCode(`[...[1,2,3,4,\`NADA\`,,,42.01,5]]`)} converts empty slots to
+      slots with value ${toCode(`undefined`)}<br>so ${toCode(`{defaultValue: "NaN"}`)} will be be
+      honored`);
   
   // number
-  print(`!!<h3>Contract: number</h3>`, `${toCode("contracts.number()")}<br>=> ${contracts.number()}`);
+  print(`!!<h3>Contract: number</h3>`);
+  print(toFormattedCode(`// contracts.number method\n${
+    String(allContracts.number.method).trim()}`));
+  print(`${toCode("contracts.number()")}<br>=> ${contracts.number()}`);
   print(`${toCode("contracts.number(undefined, {defaultValue: 42, reportViolation: true})")}<br>=> ${
     contracts.number(undefined, {defaultValue: 42, reportViolation: true})}`);
   print(`${toCode("contracts.number(13.22)")}<br>=> ${contracts.number(13.22)}`);
@@ -235,8 +248,10 @@ function createDemo() {
   const origin4Log = { origin: `** from demo contract.arrayOfNumbers **` };
   print(`!!<h3>Contract: arrayOfNumbers</h3>
     <div><b>Note</b>: Violations logged with [origin4Log]: ${
-      toCode("{origin: `** from demo contract.arrayOfNumbers **`}")}</div>`,
-    `${toCode("contracts.arrayOfNumbers()")}<br>=> ${
+      toCode("{origin: `** from demo contract.arrayOfNumbers **`}")}</div>`);
+  print(toFormattedCode(`// contracts.arrayOfNumber method\n${
+    String(allContracts.arrayOfNumbers.method).replace(`method`, `function`).trim()}`));
+  print(`${toCode("contracts.arrayOfNumbers()")}<br>=> ${
     contracts.arrayOfNumbers()}`);
   print(`${toCode("contracts.arrayOfNumbers([], origin4Log)")}<br>=> ${
     contracts.arrayOfNumbers([], origin4Log)}`);
@@ -252,17 +267,21 @@ function createDemo() {
   // objects
   const obj1 = toCode("contracts.myObject({hello: `hello`, world: `world`, universe: `universe`})");
   const obj2 = toCode("contracts.myTypedObject({first: ``, second: 42}");
-  print(`!!<h3>Contract: myObject</h3>`,
-    `${obj1}<br>=> ${JSON.stringify(contracts.myObject({hello: `hello`, world: `world`, universe: `universe`}))}`);
+  print(`!!<h3>Contract: myObject</h3>`)
+  print(toFormattedCode(`// contracts.myObject method\n${
+    String(allContracts.myObject.method).replace(`method`, `function`).trim()}`));
+  print(`${obj1}<br>=> ${JSON.stringify(contracts.myObject({hello: `hello`, world: `world`, universe: `universe`}))}`);
   print(`${toCode("contracts.myObject({world: `world`}))")}<br>=> ${JSON.stringify(contracts.myObject({world: `world`}))}`);
   print(`${obj2}<br>=> ${JSON.stringify(contracts.myTypedObject({first: ``, second: 42}))}`);
   
   // specified objects
-  print(`!!<h3>Contract: myTypedObject</h3>`,
-    `${toCode("contracts.myTypedObject({first: `The meaning of life may well be`, second: 42})")}
+  print(`!!<h3>Contract: myTypedObject</h3>`);
+  print(toFormattedCode(`// contracts.myTypedObject method\n${
+    String(allContracts.myTypedObject.method).replace(`method`, `function`).trim()}`));
+  print(`${toCode("contracts.myTypedObject({first: `The meaning of life may well be`, second: 42})")}
     <br>=> ${
-      JSON.stringify(contracts.myTypedObject({first: `The meaning of life may well be`, second: 42}, {reportViolation: true}))}`,
-    `${toCode("contracts.myTypedObject({first: 42}, { reportViolation: true })")}<br>=> ${
+      JSON.stringify(contracts.myTypedObject({first: `The meaning of life may well be`, second: 42}, {reportViolation: true}))}`);
+  print(`${toCode("contracts.myTypedObject({first: 42}, { reportViolation: true })")}<br>=> ${
       JSON.stringify(contracts.myTypedObject({first: 42}, {reportViolation: true}))}`);
   print(`${toCode("contracts.myTypedObject({second: 42}, { reportViolation: true })")}<br>=> ${
     JSON.stringify(contracts.myTypedObject({second: 42}, {reportViolation: true}))}`);
@@ -276,7 +295,10 @@ function createDemo() {
     JSON.stringify(contracts.myTypedObject({first: `The meaning of life`, second: 42, third: `NO!`}, {reportViolation: true}))}`);
   
   // numberBetween
-  print(`!!<h3>Contract: numberBetween</h3>`,`${toCode("contracts.numberBetween({nr: 17, min: 16, max: 20})")} => ${
+  print(`!!<h3>Contract: numberBetween</h3>`);
+  print(toFormattedCode(`// contracts.numberBetween method\n${
+    String(allContracts.numberBetween.method).replace(`method`, `function`).trim()}`));
+  print(`${toCode("contracts.numberBetween({nr: 17, min: 16, max: 20})")} => ${
     contracts.numberBetween(17, {min: 16, max: 20})}`);
   print(`${toCode("contracts.numberBetween({nr: 15, min: 15, max: 120, inclusive: true})")}<br>=> ${
     contracts.numberBetween(15, {min: 15, max: 120, inclusive: true})}`);
@@ -288,8 +310,16 @@ function createDemo() {
   // divide by zero
   const denominator = contracts.numberNotZero(0, {reportViolation: true});
   const numerator = contracts.number(42);
-  print(`!!<h3>Contracts: numberNotZero, divide and divider</h3>`,`<pre class="line-numbers language-javascript">
-  <code class=" line-numbers language-javascript">// contracts.numberNotZero returns 1 if the input value is 0
+  print(`!!<h3>Contracts: numberNotZero, divide and divider</h3>`);
+  print(toFormattedCode(`// contracts.numberNotZero method\n${
+    String(allContracts.numberNotZero.method)}`));
+  print(toFormattedCode(`// contracts.divide method\n${
+    String(allContracts.divide.method)}`));
+  print(toFormattedCode(`// contracts.divider method\n${
+    String(allContracts.divider.method)}`));
+  
+  print(`<pre class="line-numbers language-javascript">
+  <code class="line-numbers language-javascript">// contracts.numberNotZero returns 1 if the input value is 0
   const denominator = contracts.numberNotZero(0, {reportViolation: true}); //=> ${denominator}
   const numerator = contracts.number(42); // => ${numerator}
   print(numerator/denominator); //=> ${ numerator/denominator }
@@ -303,10 +333,10 @@ function createDemo() {
     42/contracts.numberNotZero(0)}
   // one step beyond
   print(contracts.divide(numerator, {denominator: 0})); //=> ${
-    contracts.divide(numerator, {denominator: 0}) } (see console)
+    contracts.divide(numerator, {denominator: 0}) }
   print(contracts.divide(numerator, {denominator: 3})); //=> ${
     contracts.divide(numerator, {denominator: 3}) }
-  // another step beyond (note: violations are reported by default (in the console))
+  // another step beyond
   print(contracts.divider([numerator, contracts.numberNotZero(3)])); //=> ${
     contracts.divider([numerator, contracts.numberNotZero(3)]) }
   print(contracts.divider([numerator, 0])); //=> ${
@@ -422,10 +452,12 @@ function styleDocument() {
       overflow: hidden;
     }`,
     `code.inline {
-      color: green;
-      background-color: #eee;
-      padding: 2px;
-      font-family: monospace;
+      background-color: rgb(227, 230, 232);
+      color: rgb(12, 13, 14);
+      padding: 0 4px;
+      display: inline-block;
+      border-radius: 4px;
+      margin: 1px 0;
     }`,
     `.warn { color: red; }`,
     `.container {

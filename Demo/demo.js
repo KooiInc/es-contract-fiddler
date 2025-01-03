@@ -222,11 +222,11 @@ function createDemo() {
   print(`${toCode("contracts.int(42.1)")}<br>=> ${contracts.int(42.1)}`);
   print(`${toCode("[1,2,3,4,`nothing`,,,41.999,5].filter(contracts.int)")}<br>=> [${
     [1,2,3,4,`nothing`,,,41.999,5].filter(contracts.int)}]`);
-  print(`${toCode("[...[1,2,,3,4,`NADA`,,42.1,5]].map(v => contracts.int(v, {defaultValue: `NaN`}))")}<br>=> [${
-    [...[1,2,,3,4,`NADA`,,,42.1,5]].map((v) => contracts.int(v, {defaultValue: `NaN`}))}]
+  print(`${toCode("[...[1,2,,3,4,`NADA`,,42.1,5]].map(v => contracts.int(v, {defaultValue: NaN}))")}<br>=> [${
+    [...[1,2,,3,4,`NADA`,,,42.1,5]].map((v) => contracts.int(v, {defaultValue: NaN}))}]
     <br><b>Note</b>: ${toCode(`Array.map`)} will not process empty slots of an array.
     <br>${toCode(`[...[1,2,3,4,\`NADA\`,,,42.01,5]]`)} converts empty slots to
-      slots with value ${toCode(`undefined`)}<br>so ${toCode(`{defaultValue: "NaN"}`)} will be be
+      slots with value ${toCode(`undefined`)}<br>so ${toCode(`{defaultValue: NaN}`)} will be be
       honored`);
   
   // number

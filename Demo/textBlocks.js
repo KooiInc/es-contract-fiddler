@@ -252,8 +252,7 @@ export default {
       >JQL-library</a> (<code class="inline">$</code>)</div>`,
   reporterFn: [`!!<h3>System</h3>`,
     `<pre class="line-numbers language-javascript">
-<code class=" line-numbers language-javascript">
-const reportDiv = $.div({id:"ViolationsReport"})
+<code class=" line-numbers language-javascript">const reportDiv = $("&lt;div id='ViolationsReport'>")
   .append("&lt;h3>All logged contract violations&lt;/h3>");
 // [...]
 function demoReporter(violationInfo) {

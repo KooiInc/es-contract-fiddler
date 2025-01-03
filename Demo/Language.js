@@ -24,7 +24,7 @@ export default {
     addContracts_Contract_Expected: `De parameter for [addContracts] moet tenminste ` +
       `{ [contractName]: { method: Function, expected: String|Function } } zijn`,
     addContract_Contract_Expected: `De invoer vooor [addContract] moet tenminste {name, method, expected} zijn` +
-      `\n   (wanneer de eigenschap [method] een functie met naam was wordt [name] daarvan afgeleid)`,
+      `\n   (wanneer de eigenschap [method] een functie met naam is wordt [name] daarvan afgeleid)`,
     report_sorry: (fnName, inputValue) => `✘ Contractbreuk voor ${fnName}, input ${inputValue}`,
     report_forValue: (noInput, sorryDave) => noInput ? `${sorryDave}\n   Probeer een (input-)waarde te geven` : `${sorryDave}`,
     report_IsNot: (noInput, shouldBe) => noInput ? `` : `\n   ${shouldBe}.`,

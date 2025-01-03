@@ -17,10 +17,10 @@ function typeContractFactory(specs) {
   return Object.freeze({ contracts, IS, tryJSON });
   
   function initializeArguments(specs) {
-    specs.reporter = specs.reporter || defaultViolationReporter,
-    specs.logViolations = specs.logViolations || false,
-    specs.alwaysThrow = specs.alwaysThrow || false,
-    specs.language = specs.language || `EN`
+    specs.reporter = specs.reporter || defaultViolationReporter;
+    specs.logViolations = specs.logViolations || false;
+    specs.alwaysThrow = specs.alwaysThrow || false;
+    specs.language = specs.language || `EN`;
   }
   
   function addContracts(contractLiterals) {
@@ -178,8 +178,7 @@ function indent(str, n = 3) {
 }
 
 function isNothing(val) {
-  const isString = (typeof val === `string` && val.length > 0);
-  return !isString && IS(val, undefined, null, NaN);
+  return IS(val, undefined, null);
 }
 
 function tryJSON(value) {

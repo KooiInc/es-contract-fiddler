@@ -64,7 +64,7 @@ export default {
     number: {
       method: function number(nr) { return IS(nr, Number) && isFinite(nr) ? nr : undefined; },
       expected({origin}) {
-        return \`Inuput should be a number (integer or float) \${origin ? \`\\n\${origin}\` : ""}\`;
+        return \`Input should be a number (integer or float) \${origin ? \`\\n\${origin}\` : ""}\`;
       }, },
     numberBetween: {
       method: numberBetween,
@@ -73,38 +73,38 @@ export default {
       //        ^ e.g. contracts.numberBetween(42, {min: 1, max: 42, inclusive: true})
         min = inclusive && min !== Number.MIN_SAFE_INTEGER ? min - 1 : min;
         max = inclusive && max !== Number.MAX_SAFE_INTEGER ? max + 1 : max;
-        return \`Inuput should be a number between \${min} and \${max}\`;
+        return \`Input should be a number between \${min} and \${max}\`;
       },
     },
     myObject: {
       method: myObject,
-      expected: "Inuput is not {hello, world, universe}",
+      expected: "Input is not {hello, world, universe}",
     },
     plainString: {
       method: plainString,
-      expected({extraInfo}) { return \`Inuput is not a string \${extraInfo ?  \`\\n\${extraInfo}\` : ""}\`; },
+      expected({extraInfo}) { return \`Input is not a string \${extraInfo ?  \`\\n\${extraInfo}\` : ""}\`; },
       //       ^ note: custom arguments from the call are always passed for reporting violations
       //         e.g. contracts.plainString(null, {extraInfo: "O no! Null did not work!"})
       reportViolationsByDefault: true
     },
     arrayOfNumbers: {
       method: arr => IS(arr, Array) && arr.length && !arr.find(v => !IS(v, Number)) ? arr : undefined,
-      expected({origin}) { return \`Inuput is not an array containing *only* numbers, and *at least* one number  ${
+      expected({origin}) { return \`Input is not an array containing *only* numbers, and *at least* one number  ${
     origin ? `\\n\${origin}` : ``}\`; },
       reportViolationsByDefault: true,
     },
     int: {
       method(nr, {defaultValue} = {}) { return IS(nr, Number) && isFinite(nr) && nr % 1 === 0 && nr || defaultValue; },
-      expected: "Inuput is not an integer",
+      expected: "Input is not an integer",
     },
     numberNotZero: {
       method(nr) { return IS(nr, Number) && isFinite(nr) && nr !== 0 && nr || undefined},
-      expected: "Inuput is not number < 0 or number > 0",
+      expected: "Input is not number < 0 or number > 0",
       defaultValue: 1,
     },
     stringNotEmpty: {
       method: str => contracts.plainString(str) && str.length > 0,
-      expected: "Inuput is not a non empty string",
+      expected: "Input is not a non empty string",
      },
     
     divide: {
@@ -166,7 +166,7 @@ export default {
       expected() {
         return !(contracts.int && contracts.plainString)
           ? "myTypedObject uses contracts.int an contracts.plainString, which are not assigned!"
-          : "Inuput is not {first: String, second: integer}"
+          : "Input is not {first: String, second: integer}"
       }
     }
   } );

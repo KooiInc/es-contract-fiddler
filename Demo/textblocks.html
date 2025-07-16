@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<template id="plainString">
+contracts.plainString = {
+  method: plainString,
+  expected({extraInfo}) { return `Input is not a string ${extraInfo ? `\n${extraInfo}` : ""}`; },
+  //       ^ note: custom arguments from the call are always passed for reporting violations
+  //       e.g. contracts.plainString(null, {extraInfo: "O no! Null did not work!"})
+  reportViolationsByDefault: true,
+};
+
+// plainString method
+function plainString(value) {
+  return IS(value, String) ? value : undefined;
+}
+</template>
+
+<template id="system">
+const reportDiv = $.div({id:"ViolationsReport"})
+  .append($.h3("All logged contract violations"));
+
+  // [...]
+  function demoReporter(violationInfo) {
+    const infoOk = contracts.plainString(
+      violationInfo,
+      { extraInfo: "** Origin demo.js/demoReporter **" }
+  );
+
+  return infoOk ? reportDiv.append($.pre(infoOk)) : undefined;
+}
+</template>
+
+<template id="int">
+contracts.int = {
+  name: `int`,
+  method(nr) { return IS(nr, Number) && isFinite(nr) && nr % 1 === 0 && nr || undefined; },
+  expected: `Input is not an integer`,
+};
+</template>
+
+<template id="reporter">
+const reportDiv = $.div({id:"ViolationsReport"})
+  .append("&amp;lt;h3>All logged contract violation&amp;lt;/h3>");
+// [...]
+
+function demoReporter(violationInfo) {
+  const infoOk = contracts.plainString(
+    violationInfo,
+    { extraInfo: "** Origin demo.js/demoReporter **" }
+  );
+
+  return infoOk ? reportDiv.append($.pre(infoOk)) : undefined;
+}
+</template>
+
+<template id="arrayOfNumbers">
+contracts.arrayOfNumbers = {
+  method(arr) {
+    return IS(arr, Array) && arr.length && !arr.find(v => !IS(v, Number)) ? arr : undefined;
+  },
+  expected({origin}) {
+    return `Input is not an array containing *only* numbers, and *at least* one number ${
+      origin ?  `\n${origin}` : ``}`;
+  },
+  reportViolationsByDefault: true,
+};
+</template>
+
+<template id="number">
+contracts.number = {
+  method: function number(nr) {
+    return IS(nr, Number) && isFinite(nr) ? nr : undefined;
+  },
+  expected( {origin} ) {
+    return `Input should be a number (integer or float) ${origin ? `\n${origin}` : ``}`;
+  }
+};
+</template>
+
+<template id="myObject">
+contracts.myObject = {
+  method: myObject,
+  expected: `Input is not { hello, world, universe }`,
+};
+
+function myObject(obj) {
+  const keysExpected = `hello,world,universe`.split(`,`);
+  return IS(obj, Object) &&
+    Object.keys(obj).filter(k => keysExpected.indexOf(k) > -1).length === keysExpected.length
+      ? obj : undefined;
+}
+</template>
+
+<template id="myTypedObject">
+contracts.myTypedObject = {
+  method: function(obj) {
+    const expected = {
+      first: val => IS(contracts?.plainString(val), String),
+      second: val => contracts?.int(val), };
+    const entries = Object.entries(IS(obj, Object) ? obj : {});
+    const typedOk = entries.length === 2 &&
+      entriesLengthOk &&
+      !Object.entries(expected).find( ([k, v]) => !v(obj[k]));
+
+    return !typedOk ? undefined : obj;
+  },
+
+  reportViolationsByDefault: true,
+
+  expected() {
+    return !(contracts.int && contracts.plainString)
+      ? `myTypedObject uses contracts.int an contracts.plainString, which are not assigned!`
+      : `Input can ONLY be {first: string, second: integer}`
+  }
+};
+</template>
+
+<template id="shouldThrow">
+try {
+  const myNumberTrial = contracts.numberBetween(
+    100, {
+        min: 150,
+        max: 1200,
+        inclusive: true,
+        shouldThrow: true, // <= shouldThrow activated
+    }
+  );
+} catch(err) {
+  console.error([err.name, err.stack.replace(`${err.name}: `, "")].join("\n"));
+  // the error is also printed to screen
+  print(`!!=> &amp;lt;b class="warn">${
+    err.name} thrown&amp;lt;/b>&amp;lt;pre class="noTopMargin">${
+      err.message}&amp;lt;/pre>`);
+}
+</template>
+
+<template id="explainer" data-is-html="true">
+  <pre class="codebox explainerCode closed">
+  <code class="hljs language-javascript">/**
+ * Import/initialize
+ * -----------------
+ * import {contractFactory, IS, tryJSON} from "[location of the factory]";
+ *
+ * IS is a library to check the type of anything in ES. The user can use
+ * it within contracts to check the type(s) of variables.
+ * See https://github.com/KooiInc/typeofAnything for syntax/explanation
+ *
+ * tryJSON can be used to stringify ES objects. It is used for
+ * this Demo (esp. reporting/logging).
+ *
+ * initialize using
+ * ----------------
+ * const { contracts, IS } = contractFactory({
+ *   [reporter]: Function                      => the function to use for
+ *                                                reporting contract violations
+ *                                             =>  default violationInfo => console.info(violationInfo))
+ *   [logViolations]: boolean (default false), => log violations by default
+ *                                                using [reporter]
+ *                                                (otherwise log per contract)
+ *   [alwaysThrow]: boolean (default false),   => throw when violated by default
+ *                                                (otherwise per contract)
+ * });
+ */
+
+ // initialize contracts (for demo a custom reporter function is used):
+ const { contracts, IS } = contractFactory({reporter: demoReporter});
+
+ /**
+ * [contracts] has two methods: addContract and addContracts
+ * ------
+ * syntax
+ * ------
+ * contracts.addContract({
+ *   [name]: string,                      => when method is anonymous, provide a name
+ *                                           (for reporting)
+ *   method: Function,                    => a named or anonymous function
+ *   expected: string || function,        => for reporting
+ *   [reportFn]: Function                    override the method for reporting
+ *                                           (default: console.info([violation information]))
+ *   [reportViolationsByDefault]: boolean => always report violations, default false
+ *   [customMessageFn]: function             a function to create custom violation messages.
+ *                                           May be used when the method returns a specified value
+ *                                           based on an error (which won't trigger reporting
+ *                                           a violation). See contracts.divide
+ *   [defaultValue]: any,                 => if the contract is violated, return [defaultValue]
+ *   [shouldThrow]: boolean               => Throw when violated, default false
+ * });
+ *
+ * Create from a contract definition object
+ *
+ * The user supplies {
+ *   [contract name]: { method, expected, ...},
+ *   ...,
+ *   [contract name]: { method, expected, ...} }
+ * ------------------------------------------------
+ * contracts.addContracts(contractsDefinitions: Object});
+*/
+
+// Using contracts.addContractS
+// to assign contracts used in this demo
+// -------------------------------------
+contracts.addContracts( {
+  // a number (int or float)
+  number: {
+    method: function number(nr) {
+      return IS(nr, Number) && isFinite(nr) ? nr : undefined;
+    },
+    expected({origin}) {
+      return `Inuput should be a number (integer or float) ${origin ? `\n${origin}` : ""}`;
+    }, },
+
+  // a number (int or float) between min/max value
+  numberBetween: {
+    method: numberBetween,
+    expected({min, max, inclusive} = {}) {
+    //        ^ note: arguments from the call are always passed for reporting violations
+    //        ^ e.g. contracts.numberBetween(42, {min: 1, max: 42, inclusive: true})
+      min = inclusive && min !== Number.MIN_SAFE_INTEGER ? min - 1 : min;
+      max = inclusive && max !== Number.MAX_SAFE_INTEGER ? max + 1 : max;
+      return `Inuput should be a number between ${min} and ${max}`;
+    },
+  },
+
+  // a specific object { hello, world, universe}
+  myObject: {
+    method: myObject,
+    expected: "Input is not {hello, world, universe}",
+  },
+
+  // a string (may be empty "")
+  plainString: {
+    method: plainString,
+    expected({extraInfo}) { return `Input is not a string ${extraInfo ?  `\n${extraInfo}` : ""}`; },
+    //        ^ note: custom arguments from the call site are always passed for reporting violations
+    //          e.g. contracts.plainString(null, {extraInfo: "O no! Null did not work!"})
+    reportViolationsByDefault: true
+  },
+
+  // an array that can only contain numbers
+  arrayOfNumbers: {
+    method: arr => IS(arr, Array) && arr.length && !arr.find(v => !IS(v, Number)) ? arr : undefined,
+    expected({origin}) {
+      return `Input is not an array containing *only* numbers, and *at least* one number  ${
+        origin ? `\n${origin}` : ``}`;
+    },
+    reportViolationsByDefault: true,
+  },
+
+  // an Integer
+  int: {
+    method(nr) { return IS(nr, Number) && isFinite(nr) && nr % 1 === 0 && nr || undefined; },
+    expected: "Inuput is not an integer",
+  },
+
+  // a number that is not 0
+  numberNotZero: {
+    method(nr) { return IS(nr, Number) && isFinite(nr) && nr !== 0 && nr || undefined},
+    expected: "Inuput is not number < 0 or number > 0",
+    defaultValue: 1,
+  },
+
+  // a string that can't be empty
+  stringNotEmpty: {
+    method: str => contracts.plainString(str) && str.length > 0,
+    expected: "Input is not a non empty string",
+   },
+
+  divide: {
+    // won't report when denominator is 0, customMessageFn reports that
+    // a default value was returned
+    customMessageFn({value, numerator, denominator} = {}) {
+      if ( !isFinite( (value ?? numerator)/(denominator ?? 0) ) ) {
+        demoReporter(
+          [`✘ Contract violation for contract divide`,
+            `[input: ${value ?? numerator} / denominator: ${denominator}] is not finite.`,
+            `The denominator was 0, so divided the numerator (${
+              value}) by (the default value) 1`]
+          .join(`\n   `)
+        );
+      }
+    },
+    method(value, {numerator, denominator} = {}) {
+      numerator = value ?? numerator;
+      const result = numerator/denominator;
+      return result === Infinity ? numerator/1 : result;
+    },
+    expected: "n/a",
+  },
+  divider: {
+    method: divider,
+    reportViolationsByDefault: true,
+    expected({value} = {}) {
+      value = IS(value, Array) && [...value.values()] || [];
+
+      if (value.length < 2) {
+        value = [...Array(2)].map((v, i) => {value?.[i]});
+      }
+
+      const [num, den] = value;
+      const divisionText = `${num} / ${den}`;
+      const prefix = `The result of [${divisionText}] is not finite`;
+      const message =
+        IS(num, undefined, null, NaN) && IS(den, undefined, null, NaN)
+        ? "both numerator and denominator lack a value"
+        : IS(num, undefined, null, NaN)
+          ? "the numerator has no value"
+          : IS(den, undefined, null, NaN)
+            ? "the denominator has no value"
+            : IS(den, Number) && den === 0
+              ? "The denominator can not be zero (0)"
+              : "insufficient input (should be array of 2 numbers)";
+      return `${prefix}. Cause: ${message}`;
+    },
+  },
+  myTypedObject: {
+    method: function(obj) {
+      const expected = {
+        first: val => IS(contracts?.plainString(val), String),
+        second: val => contracts?.int(val),
+      };
+
+      return !IS(obj, Object) ||
+        Object.entries(expected).find( ([k, v]) => !v(obj[k]))
+          ? undefined : obj;
+    },
+    reportViolationsByDefault: true,
+    expected() {
+      return !(contracts.int && contracts.plainString)
+        ? "myTypedObject uses contracts.int an contracts.plainString, which are not assigned!"
+        : "Input is not {first: String, second: integer}"
+    }
+  }
+} );
+
+/**
+ *  now you can use:
+ *  contract[contract name](
+ *    value,
+ *    { [local parameters], [instance creation properties] }
+ *  ):
+ *  => [local parameters]:
+ *     parameters for the contract method
+ *  => [instance creation properties]:
+ *     one or more properties as used on the instance creator (addContract)
+ *     So: eventual overrides for the instance creator function parameters
+ *  e.g.
+ *  contract.plainString("Hello!"); //=> "Hello!"
+ *  contract.number(42); //=> 42
+ *  contract.number("nocando"); //=> undefined
+ *  contract.number("nocando",  {defaultValue: 0}); //=> 0
+ *  contract.int(42.1, {reportViolation: true}); //=> undefined (report in console)
+ *  contract.numberBetween(15, {min: 10, max: 20, defaultValue: 11}); //=> 15
+ *  contract.numberBetween(5, {min: 10, max: 20, defaultValue: 11}); //=> 11
+ *
+ *  try {
+ *    contract.numberBetween(5, {min: 10, max: 20, shouldThrow: true});
+ *  } catch(err) {
+ *    console.log(err);
+ *    ...
+ *  }
+ */
+
+// Functions used in contracts
+// ---------------------------
+function plainString(value) {
+  return IS(value, String) ? value : undefined;
+}
+
+function myObject(obj) {
+  const keysExpected = "hello,world,universe".split(",");
+  return IS(obj, Object) &&
+    Object.keys(obj).filter(k => keysExpected.indexOf(k) > -1).length === keysExpected.length
+    ? obj : undefined;
+}
+
+function numberBetween( nr, {
+    min = Number.MIN_SAFE_INTEGER,
+    max = Number.MAX_SAFE_INTEGER,
+    inclusive } = {} ) {
+  min = inclusive && min !== Number.MIN_SAFE_INTEGER ? min - 1 : min;
+  max = inclusive && max !== Number.MAX_SAFE_INTEGER ? max + 1 : max;
+  return IS(nr, Number) && nr > min && nr < max && nr ||  undefined;
+}</code></pre>
+</template>
+</body>
+</html>

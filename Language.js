@@ -1,7 +1,9 @@
 export default function({ IS, tryJSON, contractsPrefix} = {}) {
-  contractsPrefix = contractsPrefix && `${contractsPrefix}\n` || ``;
+  contractsPrefix = contractsPrefix ? `${contractsPrefix}\n` : ``;
   return {
     EN: {
+      contractCreationError: `✘ (one or more of) the contract(s) could not be created. `+
+        `A contract should at least contain a [method], its value must be a function.`,
       unknownOrNa: `unknown or n/a`,
       unknown: `unknown`,
       nameOkExpected: `The contract to add needs a name (String)`,
@@ -14,14 +16,15 @@ export default function({ IS, tryJSON, contractsPrefix} = {}) {
       report_sorry: (fnName, inputValue) => `✘ ${contractsPrefix}Contract violation for contract [${
         fnName}], input ${inputValue}`,
       report_forValue: sorryDave => `${sorryDave}`,
-      report_Expected: shouldBe => `\n${shouldBe}`,
-      report_defaultValue: (hasValue, defaultValue) => !hasValue
-        ? `\nUsing the contract default value (${
+      report_Expected: shouldBe => `\nExpected (according to contract 'expected' value):\n"${shouldBe}"`,
+      report_defaultValue: defaultValue => `\nUsing the contract default value (${
           IS(defaultValue, Function)
             ? defaultValue.toString() : IS(defaultValue, String)
-              ? `"${defaultValue}"` : tryJSON(defaultValue)}) instead` : ``,
+              ? `"${defaultValue}"` : tryJSON(defaultValue)}) instead`,
     },
     NL: {
+      contractCreationError: `✘ (één of meer) contract(en) konden niet worden gecreëerd. `+
+        `Een contract moet tenminste de eigenschap [method] met een functie als waarde hebben.`,
       unknownOrNa: `onbekend of nvt`,
       unknown: `onbekend`,
       nameOkExpected: `Het contract moet een naam hebben (eigenschap name: String)`,
@@ -34,12 +37,12 @@ export default function({ IS, tryJSON, contractsPrefix} = {}) {
       report_sorry: (fnName, inputValue) => `✘ ${contractsPrefix} Contractbreuk voor contract [${
         fnName}], input ${inputValue}`,
       report_forValue: sorryDave => `${sorryDave}`,
-      report_Expected: shouldBe => `\n${shouldBe}`,
-      report_defaultValue: (hasValue, defaultValue) => !hasValue
-        ? `\nIn plaats daarvan wordt de voor dit contract toegekende standaardwaarde (${
+      report_Expected: shouldBe => `\nVerwacht werd (volgens contract 'expected'):\n"${shouldBe.trim()}"`,
+      report_defaultValue: defaultValue =>
+        `\nIn plaats daarvan wordt de voor dit contract toegekende standaardwaarde (${
           IS(defaultValue, Function)
             ? defaultValue.toString() : IS(defaultValue, String)
-              ? `"${defaultValue}"` : tryJSON(defaultValue)}) gebruikt` : ``,
+              ? `"${defaultValue}"` : tryJSON(defaultValue)}) gebruikt`,
     }
   }
 }

@@ -23,10 +23,15 @@ export default {
     <div>
       This library enables a programmer to create contracts for variables to use in code.
       <br>For every contract created, violations may be reported (by default or on demand).
-      <br>Every contract therefore is/must be created including information about what was expected.<br>
+      <br>Every contract therefore may be created including information about what was expected.<br>
       In the examples, a custom violation reporting function is used. Click 'Show contract violation logs' 
       to inspect the report.<br>
       Click "Open explainer" to open explanation and code for the contracts used in this demo.<br>
+    </div>
+    <div>
+      The library uses (and exports the main method <code class="inline">IS</code> of) the 
+      <a target="_blank" href="https://www.npmjs.com/package/typeofanything"
+      >typeofanything</a> module to determine variable types.
     </div>
     <div>The demo uses the <a target="_blank" href="https://www.npmjs.com/package/stackblitzhelpers"
       >stackblitz helper module</a>`,

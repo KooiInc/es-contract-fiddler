@@ -1,13 +1,12 @@
 //import contractFactory from "../Bundle/es-contract.min.js";
+//import contractFactory from "../es-contract_nw.js";
 import contractFactory from "../es-contract.js";
 import {logFactory, $} from "https://unpkg.com/stackblitzhelpers@latest/index.browser.js";
 import styleDocument from "./styleDoc.js";
 const isSB = /stackblitz/i.test(location.href);
-!isSB && console.clear();
 const textBlocks = await importTexts();
 const { log:print } = logFactory();
 const {contracts, IS,} = contractFactory({reporter: demoReporter});
-console.log(contracts);
 const world4TemplateString = `world`;
 window.contracts = contracts;
 window.IS = IS;
@@ -15,15 +14,20 @@ import auxText from "./textBlocks.js";
 const reportDiv = $.div({id:`ViolationsReport`}).append(`<h3>All logged contract violations</h3>`);
 styleDocument($);
 const allContracts = addContracts4Demo(contracts);
-createHeaderAndExplanation();
 createHandling();
 createDemo();
 
 function addContracts4Demo(contracts) {
   const { addContracts: addAll } = contracts;
   const allContracts = {
+    bool: {
+      method: function(val) { return IS(val, Boolean) && val; },
+      expected: `input is not a boolean value (true/false)`,
+      isBoolean: true,
+      reportViolationsByDefault: true,
+    },
     number: {
-      method: function number(nr) { return IS(nr, Number) && isFinite(nr) ? nr : undefined; },
+      method: function number(nr) { return IS(nr, Number) && isFinite(nr) && nr; },
       expected({origin}) {
         return `Input should be a number (integer or float) ${origin ? `\n${origin}` : ``}`;
       }, },
@@ -38,19 +42,20 @@ function addContracts4Demo(contracts) {
     myObject: {
       method: myObject,
       expected: `Input is not { hello, world, universe }`,
+      reportViolationsByDefault: true,
     },
     plainString: {
       method: plainString,
-      expected({extraInfo}) { return `Input is not a string ${extraInfo ?  `\n${extraInfo}` : ``}`; },
+      expected({extraInfo}) { return `Input is not a string${extraInfo ?  `"\n${extraInfo}` : ``}`; },
       reportViolationsByDefault: true
     },
     int: {
       name: `int`,
-      method(nr) { return IS(nr, Number) && isFinite(nr) && nr % 1 === 0 && nr || undefined; },
+      method(nr) { return IS(nr, Number) && isFinite(nr) && nr % 1 === 0 && nr; },
       expected: `Input is not an integer`,
     },
     numberNotZero: {
-      method(nr) { return IS(nr, Number) && isFinite(nr) && nr !== 0 && nr || undefined},
+      method(nr) { return IS(nr, Number) && isFinite(nr) && nr !== 0 && nr},
       expected: `Input is not number < 0 or number > 0`,
       defaultValue: 1,
     },
@@ -77,33 +82,27 @@ function addContracts4Demo(contracts) {
           );
         }
       },
-      method: function(value, {numerator, denominator} = {}) {
+      method: function divide(value, {numerator, denominator} = {}) {
         numerator = value ?? numerator;
+        denominator = denominator ?? 1;
         const result = numerator/denominator;
         return result === Infinity ? numerator/1 : result;
       },
-      //expected: `n/a`
     },
     divider: {
       method: divider,
       reportViolationsByDefault: true,
-      expected({value} = {}) {
-        value = IS(value, Array) && [...value.values()] || [];
-
-        if (value.length < 2) {
-          value = [...Array(2)].map( (v, i) => value?.[i] );
-        }
-
-        const [num, den] = value;
-        const divisionText = `${num} / ${den}`;
+      expected({value}) {
+        const [numerator, denominator] = value ?? [,];
+        const divisionText = `${numerator} / ${denominator}`;
         const prefix = `The result of [${divisionText}] is not finite`;
-        const message = IS(num, undefined, null, NaN) && IS(den, undefined, null, NaN)
+        const message = IS(numerator, undefined, null, NaN) && IS(denominator, undefined, null, NaN)
           ? "both numerator and denominator lack a value"
-            : IS(num, undefined, null, NaN)
+            : IS(numerator, undefined, null, NaN)
               ? `the numerator has no value`
-              : IS(den, undefined, null, NaN)
+              : IS(denominator, undefined, null, NaN)
                 ? `the denominator has no value`
-                : IS(den, Number) && den === 0
+                : IS(denominator, Number) && denominator === 0
                   ? "The denominator can not be zero (0)"
                   : `insufficient input (should be array of 2 numbers)`;
         return `${prefix}\nCause: ${message}`;
@@ -112,8 +111,8 @@ function addContracts4Demo(contracts) {
     myTypedObject: {
       method: function(obj) {
         const expected = {
-          first: val => IS(contracts?.plainString(val), String),
-          second: val => contracts?.int(val), };
+          first: val => IS(val, String),
+          second: val => contracts.int(val), };
         const entries = Object.entries(IS(obj, Object) ? obj : {});
         const typedOk = entries.length === 2 &&
           !Object.entries(expected).find( ([k, v]) => !v(obj[k]));
@@ -132,25 +131,25 @@ function addContracts4Demo(contracts) {
   addAll(allContracts);
   window.contracts = contracts;
 
-  function divider(value) {
-    value = IS(value, Array) && [...value.values()] || [];
+  function divider(values) {
+    values = (IS(values, Array)
+      ? values.length < 2 ? [...Array(2)].map((_, i) => values?.[i]) : values
+      : [0, 0]);
+    const [numerator, denominator] = values;
+    const result = numerator/denominator;
 
-    if (value.length < 2) { value = [...Array(2)].map((_, i) => value?.[i]); }
-
-    const [numerator, denominator] = value;
-    const denominatorIsZero = IS(denominator, Number) && denominator === 0;
-    const result = denominatorIsZero ? undefined : numerator/denominator;
     return isFinite(result) ? result : undefined;
   }
 
   function plainString(value) {
-    return IS(value, String) ? value : undefined;
+    return IS(value, String) && value;
   }
 
-  function numberBetween(nr, {min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER, inclusive} = {}) {
-    min = inclusive && min !== Number.MIN_SAFE_INTEGER ? min - 1 : min;
-    max = inclusive && max !== Number.MAX_SAFE_INTEGER ? max + 1 : max;
-    return IS(nr, Number) && isFinite(nr) && nr > min && nr < max && nr ||  undefined;
+  function numberBetween(nr, {min, max, inclusive} = {}) {
+    inclusive = IS(inclusive, Boolean) ? +inclusive : 0;
+    min = (min || Number.MIN_SAFE_INTEGER + 1) - inclusive;
+    max = (max || Number.MAX_SAFE_INTEGER - 1) + inclusive;
+    return IS(nr, Number) && isFinite(nr) && nr > min && nr < max && nr;
   }
 
   function myObject(obj) {
@@ -163,6 +162,7 @@ function addContracts4Demo(contracts) {
 }
 
 function createHeaderAndExplanation() {
+  !isSB && console.clear();
   $(`<div class="container">`).append($(`#log2screen`));
   const sbLink = isSB
     ? `<p><a target="_top" href="//stackblitz.com/@KooiInc">All projects</a> | ` : ``;
@@ -189,9 +189,11 @@ function createHandling() {
 }
 
 function createDemo() {
-  print(`!!<h2>Examples</h2>`);
-  // 'system'
+  createHeaderAndExplanation();
 
+  print(`!!<h2>Examples</h2>`);
+
+  // 'system'
   print(
     `!!<h3>System</h3>`,
     codeToFormatted(textBlocks.system),
@@ -209,12 +211,37 @@ function createDemo() {
     contracts.plainString(`hello ${world4TemplateString}`)}`);
   print(`${toCode("contracts.plainString()")}<br>=> ${
     contracts.plainString()}`);
-  print(`${toCode("contracts.plainString([1,2,3])")} => ${contracts.plainString([1,2,3])}`);
+  print(`${toCode("contracts.plainString([1,2,3])")}<br>=> ${contracts.plainString([1,2,3])}`);
   print(`${toCode("contracts.plainString([1,2,3], {defaultValue: `Nothing`, reportViolation: true})")}<br>=> ${
     contracts.plainString([1,2,3], {defaultValue: `Nothing`, reportViolation: true})}`);
   print(`${
     toCode("contracts.plainString(undefined, {extraInfo: `**Logged by the 'expected' function in contracts.plainString**`})")}
     <br>=> ${contracts.plainString(undefined, {extraInfo: `**Logged by the 'expected' function in contracts.plainString**`})}`);
+
+  // bool
+  const compareValue = false;
+  const {bool} = contracts;
+  print(`!!<h3>Contract: bool</h3>`);
+  print(codeToFormatted(textBlocks.bool));
+  print(`${toCode("bool()")} => ${bool()}`);
+  print(`${toCode("bool(!!!undefined)")} => ${bool(!!!undefined)}`);
+  print(`${toCode("bool('hello')")} => ${bool(`hello`)}`);
+  print(`${toCode("bool(0)")} => ${bool(0)}`);
+  print(`${toCode("bool(!!0)")} => ${bool(!!0)}`);
+  print(`${toCode("bool(new Boolean())")} => ${bool(new Boolean())}`);
+  print(`${toCode("bool(new Boolean(true))")} => ${bool(new Boolean(true))}`);
+  print(`${toCode("bool(!!`hello`)")} => ${bool(!!`hello`)}`);
+  print(`${toCode("bool([0, 1, 2])")} => ${bool([0, 1, 2])}`);
+  print(`${toCode("bool(true)")} => ${bool(true)}`);
+  print(`${toCode("bool(false)")} => ${bool(false)}`);
+  print(`${toCode("bool(true) === compareValue")} => ${bool(true) === compareValue}`);
+  print(`${toCode("bool(false) === compareValue")} => ${bool(false) === compareValue}`);
+  print(`${toCode("bool(null, {defaultValue: false})")} => ${
+    bool(null, {defaultValue: false})}`);
+  print(`${toCode("bool(null, {defaultValue: false}) === compareValue")} => ${
+    bool(null, {defaultValue: false})  === compareValue}`);
+  print(`${toCode("bool(compareValue) !== undefined")} => ${
+    bool(compareValue) !== undefined }`);
 
   // number
   print(`!!<h3>Contract: number</h3>`);
@@ -274,6 +301,8 @@ function createDemo() {
   print(`${toCode("contracts.myObject({world: `world`}))")}<br>=> ${JSON.stringify(contracts.myObject({world: `world`}))}`);
 
   // specified objects
+  const validObject = { first: "number one", second: 42 };
+  const invalidObject = { first: 42, second: "number one" };
   print(`!!<h3>Contract: myTypedObject</h3>`);
   print(codeToFormatted(textBlocks.myTypedObject));
   print(`${toCode("contracts.myTypedObject({first: `The meaning of life may well be`, second: 42})")}
@@ -292,12 +321,17 @@ function createDemo() {
   <br>=> ${
     JSON.stringify(contracts.myTypedObject({first: `The meaning of life`, second: 42, third: `NO!`}, {reportViolation: true}))}`);
   print(`${obj2}<br>=> ${JSON.stringify(contracts.myTypedObject({first: ``, second: 42}))}`);
-  print(`${toCode(`contracts.myTypedObject({first: null, second: 42})`)}<br>=> ${JSON.stringify(contracts.myTypedObject({first: null, second: 42}))}`);
+  print(`${toCode(`contracts.myTypedObject({first: null, second: 42})`)}<br>=> ${
+    JSON.stringify(contracts.myTypedObject({first: null, second: 42}))}`);
+  print(`${toCode(`contracts.myTypedObject(validObject) !== undefined`)}<br>=> ${
+    JSON.stringify(contracts.myTypedObject(validObject) !== undefined)}`);
+  print(`${toCode(`contracts.myTypedObject(invalidObject) !== undefined`)}<br>=> ${
+    JSON.stringify(contracts.myTypedObject(invalidObject) !== undefined)}`);
 
   // numberBetween
+  const isBetween = value => value !== undefined;
   print(`!!<h3>Contract: numberBetween</h3>`);
-  print(toFormattedCode(`// contracts.numberBetween method\n${
-    String(allContracts.numberBetween.method).replace(`method`, `function`).trim()}`));
+  print(toFormattedCode(textBlocks.numberBetween));
   print(`${toCode("contracts.numberBetween({nr: 17, min: 16, max: 20})")} => ${
     contracts.numberBetween(17, {min: 16, max: 20})}`);
   print(`${toCode("contracts.numberBetween({nr: 15, min: 15, max: 120, inclusive: true})")}<br>=> ${
@@ -306,50 +340,57 @@ function createDemo() {
     contracts.numberBetween(15, {min: 15, max: 120, reportViolation: true})}`);
   print(`${toCode("contracts.numberBetween(149, {min: 150, max: 1200, inclusive: true, reportViolation: true})")}<br>=> ${
     contracts.numberBetween(149, {min: 150, max: 1200, inclusive: true, reportViolation: true})}`);
+  print(`${toCode("isBetween(contracts.numberBetween(175, {min: 150, max: 1200, inclusive: true, reportViolation: true}))")}<br>=> ${
+    isBetween(contracts.numberBetween(175, {min: 150, max: 1200, inclusive: true, reportViolation: true}))}`);
+  print(`${toCode("isBetween(contracts.numberBetween(42, {min: 150}))")} (actually '> 150') <br>=> ${
+    isBetween(contracts.numberBetween(42, {min: 150}))}`);
+  print(`${toCode("isBetween(contracts.numberBetween(42, {max: 100}))")} (actually '< 100') <br>=> ${
+    isBetween(contracts.numberBetween(42, {max: 100}))}`);
 
   // divide by zero
   const denominator = contracts.numberNotZero(0, {reportViolation: true});
   const numerator = contracts.number(42);
   print(`!!<h3>Contracts: numberNotZero, divide and divider</h3>`);
-  print(toFormattedCode(`// contracts.numberNotZero method\n${
-    String(allContracts.numberNotZero.method)}`));
-  print(toFormattedCode(`// contracts.divide method\n${
-    String(allContracts.divide.method)}`));
-  print(toFormattedCode(`// contracts.divider method\n${
-    String(allContracts.divider.method)}`));
+  print(codeToFormatted(textBlocks.numberNotZero));
 
-  print(`!!<pre class="codebox language-javascript"><code class="codebox language-javascript"
->// contracts.numberNotZero returns 1 if the input value is 0
-const denominator = contracts.numberNotZero(0, {reportViolation: true}); //=> ${denominator}
-const numerator = contracts.number(42); // => ${numerator}
-numerator/denominator; //=> ${ numerator/denominator }
-numerator/contracts.numberNotZero(3); //=> ${
-  42/contracts.numberNotZero(3)}
-numerator/contracts.numberNotZero(numerator); //=> ${
-  42/contracts.numberNotZero(42)}
-numerator/contracts.numberNotZero(0); //=> ${
-  42/contracts.numberNotZero(0)}
-numerator/contracts.numberNotZero(); //=> ${
-  42/contracts.numberNotZero(0)}
+  print(codeToFormatted(textBlocks.dividerVars));
 
-// one step beyond (note: divide uses customMessageFn)
-contracts.divide(numerator, {denominator: 0}); //=> ${
-  contracts.divide(numerator, {denominator: 0}) }
-contracts.divide(numerator, {denominator: 3}); //=> ${
-  contracts.divide(numerator, {denominator: 3}) }
+  print(
+    `${toCode("numerator/denominator")} //=> ${ numerator/denominator }`,
+    `${toCode("numerator/contracts.numberNotZero(3)")} //=> ${numerator/contracts.numberNotZero(3)}`,
+    `${toCode("numerator/contracts.numberNotZero(numerator)")} //=> ${numerator/contracts.numberNotZero(42)}`,
+    `${toCode("numerator/contracts.numberNotZero(0)")} => ${numerator/contracts.numberNotZero(0)}`,
+    `${toCode("numerator/contracts.numberNotZero()")} => ${numerator/contracts.numberNotZero()}`,
+  );
 
-// another step beyond
-contracts.divider([numerator, contracts.numberNotZero(3)]); //=> ${
-  contracts.divider([numerator, contracts.numberNotZero(3)]) }
-contracts.divider([numerator, 0]); //=> ${
-  contracts.divider([numerator, 0]) }
-contracts.divider(["fourtyTwo", 0]); //=> ${
-  contracts.divider(["fourtyTwo", 0]) }
-contracts.divider([undefined, 0]); //=> ${contracts.divider([undefined, 0]) }
-contracts.divider([0, undefined]); //=> ${contracts.divider([0, undefined]) }
-contracts.divider([0, NaN]); //=> ${contracts.divider([0, NaN]) }
-contracts.divider([NaN, 0]); //=> ${contracts.divider([NaN, 0]) }
-contracts.divider(); //=> ${ contracts.divider() }</code></pre>`);
+  print(
+    $.h3({class: `between`, data: {header: true} }, `contracts.divide`),
+    codeToFormatted(textBlocks.divide)
+  );
+
+  print(
+    `${toCode("contracts.divide(numerator, {denominator: 0})")} => ${contracts.divide(numerator, {denominator: 0})}`,
+    `${toCode("contracts.divide(numerator, {denominator: 3})")} => ${contracts.divide(numerator, {denominator: 3})}`,
+    `${toCode("contracts.divide(numerator)")} => ${contracts.divide(numerator)}`,
+  );
+
+  print(
+    $.h3({class: `between`, data: {header: true} }, `contracts.divider`),
+    codeToFormatted(textBlocks.divider)
+  );
+
+  print(
+    `${toCode("contracts.divider()")} => ${contracts.divider()}`,
+    `${toCode("contracts.divider(numerator, contracts.numberNotZero(3))")} ${
+      contracts.divider([numerator, contracts.numberNotZero(3)])}`,
+    `${toCode("contracts.divider(numerator, 0)")} => ${contracts.divider([numerator, 0])}`,
+    `${toCode('contracts.divider("fourtyTwo", 0)')} => ${contracts.divider(["fourtyTwo", 0])}`,
+    `${toCode("contracts.divider(undefined, 0)")} //=> ${contracts.divider([undefined, 0])}`,
+    `${toCode("contracts.divider(1000, 2.5)")} //=> ${contracts.divider([1000, 2.5])}`,
+    `${toCode("contracts.divider(1000, 999.5)")} //=> ${contracts.divider([1000, 999.5])}`,
+    `${toCode("contracts.divider(2.5)")} //=> ${contracts.divider([2.5])}`,
+    `${toCode("contracts.divider(2.5, '2.5')")} //=> ${contracts.divider([2.5, "2.5"])}`,
+  )
 
   print(`!!<h3>shouldThrow</h3>`);
   print(codeToFormatted(textBlocks.shouldThrow));

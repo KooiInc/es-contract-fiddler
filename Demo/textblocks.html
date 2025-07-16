@@ -6,11 +6,12 @@
 </head>
 <body>
 <template id="plainString">
+const world4TemplateString = "world";
 contracts.plainString = {
   method: plainString,
   expected({extraInfo}) { return `Input is not a string ${extraInfo ? `\n${extraInfo}` : ""}`; },
-  //       ^ note: custom arguments from the call are always passed for reporting violations
-  //       e.g. contracts.plainString(null, {extraInfo: "O no! Null did not work!"})
+  //        ^ note: custom arguments from the call are always passed for reporting violations
+  //          e.g. contracts.plainString(null, {extraInfo: "O no! Null did not work!"})
   reportViolationsByDefault: true,
 };
 
@@ -41,6 +42,17 @@ contracts.int = {
   method(nr) { return IS(nr, Number) && isFinite(nr) && nr % 1 === 0 && nr || undefined; },
   expected: `Input is not an integer`,
 };
+</template>
+
+<template id="bool">
+contracts.bool = {
+  method: function bool(val) { return IS(val, Boolean) && val; },
+  expected: `input is not a boolean value (true/false)`,
+  isBoolean: true, // => mandatory for boolean return value
+  reportViolationsByDefault: true,
+};
+const {bool} = contracts;
+const compareValue = false;
 </template>
 
 <template id="reporter">
@@ -97,6 +109,8 @@ function myObject(obj) {
 </template>
 
 <template id="myTypedObject">
+const validObject = { first: "number one", second: 42 };
+const invalidObject = { first: 42, second: "number one" };
 contracts.myTypedObject = {
   method: function(obj) {
     const expected = {
@@ -139,9 +153,106 @@ try {
 }
 </template>
 
+<template id="numberBetween">
+const isBetween = value => value !== undefined;
+contracts.numberBetween = {
+  method: numberBetween,
+  expected({min, max, inclusive} = {}) {
+  min = inclusive && min !== Number.MIN_SAFE_INTEGER ? min - 1 : min;
+  max = inclusive && max !== Number.MAX_SAFE_INTEGER ? max + 1 : max;
+  return `Input should be a number between (and not including) ${min} and ${max}`;
+  },
+};
+
+// method
+function numberBetween(nr, {min, max, inclusive} = {}) {
+  inclusive = IS(inclusive, Boolean) ? +inclusive : 0;
+  min = (min || Number.MIN_SAFE_INTEGER + 1) - inclusive;
+  max = (max || Number.MAX_SAFE_INTEGER - 1) + inclusive;
+  return IS(nr, Number) && isFinite(nr) && nr > min && nr < max && nr;
+}
+</template>
+
+<template id="numberNotZero">
+contracts.numberNotZero = {
+  method(nr) { return IS(nr, Number) &&
+    isFinite(nr) &&
+    nr !== 0 &&
+    nr || 1;
+    //    ^ note: never fails, always returns
+    //      either the value or 1
+  },
+};
+</template>
+
+<template id="divide">
+contracts.divide: {
+  customMessageFn({value, numerator, denominator} = {}) {
+    if ( !isFinite( (value ?? numerator)/(denominator ?? 0) ) ) {
+      demoReporter(
+        [`✘ Contract violation for contract divide`,
+         `[input: ${value ?? numerator} / denominator: ${denominator}] is not finite.`,
+         `The denominator was 0, so divided the numerator (${value}) by (the default value) 1`]
+        .join(`\n   `)
+      );
+    }
+  },
+  method: function divide(value, {numerator, denominator} = {}) {
+    numerator = value ?? numerator;
+    const result = numerator/denominator;
+    return result === Infinity ? numerator/1 : result;
+  },
+};
+
+</template>
+
+<template id="divider">
+contracts.divider: {
+  method: divider,
+  reportViolationsByDefault: true,
+  expected({value} = {}) {
+    value = IS(value, Array) && [...value.values()] || [];
+
+    if (value.length < 2) {
+      value = [...Array(2)].map( (v, i) => value?.[i] );
+    }
+
+    const [num, den] = value;
+    const divisionText = `${num} / ${den}`;
+    const prefix = `The result of [${divisionText}] is not finite`;
+    const message = IS(num, undefined, null, NaN) && IS(den, undefined, null, NaN)
+      ? "both numerator and denominator lack a value"
+      : IS(num, undefined, null, NaN)
+        ? `the numerator has no value`
+        : IS(den, undefined, null, NaN)
+          ? `the denominator has no value`
+          : IS(den, Number) && den === 0
+            ? "The denominator can not be zero (0)"
+            : `insufficient input (should be array of 2 numbers)`;
+    return `${prefix}\nCause: ${message}`;
+  };
+};
+// method
+function divider(...values) {
+  values = values.length < 2
+  ? [...Array(2)].map((_, i) => values?.[i])
+  : values;
+
+  let [numerator, denominator] = values;
+  denominator = IS(denominator, Number) && denominator > 0 ? denominator : 0;
+  const result = numerator/denominator;
+
+  return isFinite(result) ? result : undefined;
+}
+</template>
+
+<template id="dividerVars">
+const denominator = contracts.numberNotZero(0, {reportViolation: true});
+const numerator = contracts.number(42);
+</template>
+
 <template id="explainer" data-is-html="true">
-  <pre class="codebox explainerCode closed">
-  <code class="hljs language-javascript">/**
+  <pre class="codebox explainerCode closed"><code class="hljs language-javascript">/**
  * Import/initialize
  * -----------------
  * import {contractFactory, IS, tryJSON} from "[location of the factory]";
@@ -169,6 +280,7 @@ try {
 
  // initialize contracts (for demo a custom reporter function is used):
  const { contracts, IS } = contractFactory({reporter: demoReporter});
+ //                 ^ the IS method is from the typeofanything module.
 
  /**
  * [contracts] has two methods: addContract and addContracts
@@ -176,10 +288,15 @@ try {
  * syntax
  * ------
  * contracts.addContract({
+ *   method: Function,                    => A named or anonymous function.
+ *                                           If not checking booleans, this is the only mandatory.
+ *                                           Its return value should be either the checked
+ *                                           value, or one of [undefined, null true, false].
+ *   [isBoolean]: boolean                 => when the tested value should be a boolean
+ *                                           isBoolean is mandatory.
  *   [name]: string,                      => when method is anonymous, provide a name
  *                                           (for reporting)
- *   method: Function,                    => a named or anonymous function
- *   expected: string || function,        => for reporting
+ *   [expected]: string || function,      => for reporting
  *   [reportFn]: Function                    override the method for reporting
  *                                           (default: console.info([violation information]))
  *   [reportViolationsByDefault]: boolean => always report violations, default false
@@ -199,6 +316,9 @@ try {
  *   [contract name]: { method, expected, ...} }
  * ------------------------------------------------
  * contracts.addContracts(contractsDefinitions: Object});
+ *
+ *  A value checked by a contract that doesn't conform to the contract always
+  * returns undefined.
 */
 
 // Using contracts.addContractS
@@ -348,10 +468,15 @@ contracts.addContracts( {
  *  => [instance creation properties]:
  *     one or more properties as used on the instance creator (addContract)
  *     So: eventual overrides for the instance creator function parameters
+ *
+ *  If [value] conforms to what it should be (the result of the method of the
+ *  contract), it returns the value. If not, it returns undefined or false
+ *  or the value/defaultValue you returned from the method of the contract).
+ *
  *  e.g.
  *  contract.plainString("Hello!"); //=> "Hello!"
  *  contract.number(42); //=> 42
- *  contract.number("nocando"); //=> undefined
+ *  contract.number("nocando"); //=> false
  *  contract.number("nocando",  {defaultValue: 0}); //=> 0
  *  contract.int(42.1, {reportViolation: true}); //=> undefined (report in console)
  *  contract.numberBetween(15, {min: 10, max: 20, defaultValue: 11}); //=> 15

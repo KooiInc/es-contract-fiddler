@@ -28,7 +28,7 @@ export default {
     report_sorry: (fnName, inputValue) => `✘ Contractbreuk voor ${fnName}, input ${inputValue}`,
     report_forValue: (noInput, sorryDave) => noInput ? `${sorryDave}\n   Probeer een (input-)waarde te geven` : `${sorryDave}`,
     report_IsNot: (noInput, shouldBe) => noInput ? `` : `\n   ${shouldBe}.`,
-    report_defaultValue: (hasValue, defaultValue) => !hasValue ? `\n   In plaats daarvan wordt de toegekende standaardwaarde (${
-      defaultValue}) gebruikt.` : ``,
+    report_defaultValue: defaultValue => `\n   In plaats daarvan wordt de toegekende standaardwaarde (${
+      defaultValue}) gebruikt.`,
   }
 }

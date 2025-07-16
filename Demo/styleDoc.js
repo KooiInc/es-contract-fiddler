@@ -26,6 +26,12 @@ function styleDocument($) {
       display: inline-block;
       margin: 1rem auto 0.5rem auto;
     }`,
+    `h3.between {
+      color: cornflowerblue;
+      margin: -0.5rem 0 -0.5rem 0;
+      display: inline-block;
+      border: none;
+     }`,
     `pre.codebox {
       box-shadow: 2px 2px 6px #555;
       border-radius: 6px;

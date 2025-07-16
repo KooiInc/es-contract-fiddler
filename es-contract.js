@@ -1,82 +1,85 @@
-import IS from "https://unpkg.com/typeofanything@1.4.2/typeofany.module.js";
+import IS from "https://unpkg.com/typeofanything@latest/typeofany.module.js";
 import languageFactory from "./Language.js";
-let lang;
 
 export default typeContractFactory;
 
-const destructuredPresets = getParams4Destructuring();
+let lang;
+let specs = initializeArguments({});
 const localFactoryContractMethods = getFactoryContractCheckMethods();
+const localContracts = addFactoryContracts( {language: `EN`} );
 
-function typeContractFactory(specs) {
-  initializeArguments(specs);
-  const { reporter, logViolations, alwaysThrow, language, contractsPrefix } = specs;
-  lang = languageFactory({IS, tryJSON, contractsPrefix})[language];
+function typeContractFactory( instanceSpecs ) {
+  specs = initializeArguments(instanceSpecs);
   const contracts = { addContract, addContracts };
-  addFactoryContracts( contracts );
-
   return Object.freeze({ contracts, IS, tryJSON });
 
-  function initializeArguments(specs) {
-    specs.reporter = specs.reporter || defaultViolationReporter;
-    specs.logViolations = specs.logViolations || false;
-    specs.alwaysThrow = specs.alwaysThrow || false;
-    specs.language = specs.language || `EN`;
-  }
+  function addContracts( contractDefinitions ) {
+    if (!localContracts.addContracts_Contract(contractDefinitions)) { return; }
 
-  function addContracts(contractLiterals) {
-    if (!contracts.addContracts_Contract(contractLiterals)) { return; }
-
-    const entries = Object.entries(contractLiterals);
+    const entries = Object.entries(contractDefinitions);
 
     for (let [name, contract] of entries) {
       addContract( { ...contract, paramsChecked: true, name } );
     }
   }
 
-  function addContract( params = destructuredPresets.addContract ) {
+  function addContract( params ) {
     let { name, method, expected, defaultValue, customMessageFn, reportFn,
-      shouldThrow, reportViolationsByDefault, paramsChecked, enumerable } = params;
+      shouldThrow, reportViolationsByDefault, paramsChecked, isBoolean = false} = params;
     name = name || method?.name;
-    const addContract_Contract = contracts.addContract_Contract ||
-      localFactoryContractMethods.checkSingleContractParameters;
+    expected = expected || `unknown`;
 
-    if (!paramsChecked && !addContract_Contract({name, method, expected})) { return; }
+    if (!paramsChecked && !localFactoryContractMethods.checkSingleContractParameters({method})) {
+      return specs.reporter(lang.contractCreationError);
+    }
 
-    const embedded = contractMethodFactory( {
-      name, method, expected, defaultValue, reporter,
-      reportFn,  customMessageFn, reportViolationsByDefault,
-      logViolations, shouldThrow, alwaysThrow } );
-
-    return Object.defineProperty( contracts, name, { value: embedded, enumerable } );
+    const embedded = newContractFactory( {
+      name, method, expected, defaultValue, reporter: instanceSpecs.reporter,
+      reportFn, customMessageFn, reportViolationsByDefault, isBoolean,
+      logViolations: instanceSpecs.logViolations, shouldThrow, alwaysThrow: instanceSpecs.alwaysThrow, } );
+    return Object.defineProperty( contracts, name, { value: embedded, } );
   }
 }
 
-function contractMethodFactory( params = destructuredPresets.createContract ) {
-  let { name, method, expected, defaultValue, customMessageFn, reportFn, reporter,
-    logViolations, shouldThrow, reportViolationsByDefault, alwaysThrow } = params;
+function initializeArguments( specs ) {
+  specs.reporter = specs.reporter || defaultViolationReporter;
+  specs.logViolations = specs.logViolations || false;
+  specs.alwaysThrow = specs.alwaysThrow || false;
+  specs.language = languageFactory({IS, tryJSON})[specs.language || `EN`];
+  lang = specs.language;
+  return specs;
+}
 
-  return function(value, ...args) {
+function newContractFactory( params ) {
+  let {
+    name, method, expected, defaultValue, customMessageFn, reportFn, reporter,
+    logViolations, shouldThrow, reportViolationsByDefault, alwaysThrow, isBoolean,
+  } = params;
+
+  return function( value, ...args ) {
     let resolved = method(value, ...args);
-    const argsWithValue = IS(args[0], Object) && {...args[0], value} || {value};
+    const doesNotResolve = isNothing(resolved) || (!isBoolean && !resolved) || (isBoolean && !!!IS(value, Boolean));
+    const args4Reporting = IS(args[0], Object) && {...args[0], value} || {value};
     reportFn = reportFn ?? reporter ?? defaultViolationReporter;
 
-    if (IS(customMessageFn, Function)) { customMessageFn(argsWithValue); }
+    if ( IS(customMessageFn, Function) ) { customMessageFn(args4Reporting); }
 
-    if (isNothing(resolved)) {
-      const expectedValue = IS(expected, Function) ? expected(argsWithValue) : expected;
-      let valueDefault = defaultValue ? defaultValue : argsWithValue.defaultValue;
-      resolved = !isNothing(valueDefault) ? valueDefault : resolved;
+    if ( doesNotResolve ) {
+      (name || methodName) === `divider` && console.log(value, args, args4Reporting);
+      const expectedValue = IS(expected, Function) ? expected(args4Reporting) : expected;
+      let valueDefault = defaultValue || args4Reporting.defaultValue;
 
       const [doReport, throwIt] = [
-        argsWithValue.reportViolation ?? reportViolationsByDefault,
-        argsWithValue.shouldThrow ?? shouldThrow ];
+        args4Reporting.reportViolation ?? reportViolationsByDefault,
+        args4Reporting.shouldThrow ?? shouldThrow ];
 
       if ( doReport || throwIt || logViolations) {
         const aggregatedReport = getViolationReport( {
           inputValue: value,
-          defaultValue: resolved,
-          shouldBe: expectedValue,
+          defaultValue: valueDefault,
+          shouldBe: expectedValue.trim(),
           fnName: name || method.name,
+          isBoolean,
         } );
 
         if (throwIt || alwaysThrow) {
@@ -85,114 +88,74 @@ function contractMethodFactory( params = destructuredPresets.createContract ) {
 
         reporter(aggregatedReport);
       }
+
+      return isBoolean && IS(valueDefault, Boolean) ? valueDefault : valueDefault || undefined;
     }
+
     return resolved;
   };
 }
 
-function getParams4Destructuring() {
-  const [ name, method, expected, defaultValue, customMessageFn,
-    reportFn, inputValue ] = [...Array(7)];
-  return {
-    get reportViolations() {
-      return { inputValue, defaultValue, shouldBe: lang.unknowOrNa, fnName: lang.unknown, };
-    },
-    get createContract() {
-      return { name, method, expected, defaultValue, customMessageFn: customMessageFn, reportFn,
-        reporter: defaultViolationReporter,
-        logViolations: false, shouldThrow: false, alwaysThrow: false,
-        reportViolationsByDefault: false };
-    },
-    get addContract() {
-      return { name, method, expected, defaultValue, customMessageFn: customMessageFn, reportFn,
-        reporter: defaultViolationReporter, shouldThrow: false, reportViolationsByDefault: false,
-        paramsChecked: false, enumerable, };
-    },
-  }
+function getViolationReport( params ) {
+  const { inputValue, defaultValue, shouldBe, fnName, isBoolean } = params;
+  const hasDefaultValue = !isNothing(defaultValue) || isBoolean && IS(defaultValue, Boolean);
+  const sorryDave = lang.report_sorry(fnName, formatInput(inputValue));
+  const forValue =  lang.report_forValue(sorryDave);
+  const itIsNot = lang.report_Expected(shouldBe);
+
+  return indent(`${forValue}${itIsNot}${hasDefaultValue && lang.report_defaultValue(defaultValue) || ``}`);
 }
+
 
 function getFactoryContractCheckMethods() {
   const nameOk = name => IS(name, String) && name.trim().length;
   const expectedOk = expected => IS(expected, String) && expected.length || IS(expected, Function);
   const isMethod = method => IS(method, Function);
-  const checkSingleContractParameters = ({name, method, expected} = {}) =>
-    name && nameOk(name) &&
-    method && isMethod(method) &&
-    expected && expectedOk(expected);
+  const checkSingleContractParameters = ({name, method} = {}) =>
+    nameOk(name || method.name)  && IS(method, Function);
 
   return { nameOk, expectedOk, isMethod, checkSingleContractParameters  };
 }
 
-function addFactoryContracts( contracts ) {
+function addFactoryContracts( ) {
   const {nameOk, expectedOk, isMethod, checkSingleContractParameters} = localFactoryContractMethods;
-  contracts.addContract({
-    method: nameOk,
-    expected: lang.nameOkExpected,
-    reportViolationsByDefault: true,
-    enumerable: false,
-  });
-  contracts.addContract({
-    method: isMethod,
-    expected: lang.isMethodExpected,
-    reportViolationsByDefault: true,
-  });
-  contracts.addContract({
-    method: expectedOk,
-    expected: lang.expectedOkExpected,
-    reportViolationsByDefault: true,
-  });
-  contracts.addContract({
-    name: `addContracts_Contract`,
-    method: literals => {
+  return {
+    nameOk: nameOk,
+    isMethod: isMethod,
+    expectedOk: expectedOk,
+    addContracts_Contract(literals) {
+      const entries = [...Object.entries(literals)];
       const checked = IS(literals, Object) &&
-        [...Object.entries(literals)].filter( ([, value]) =>
-          value.method &&
-          isMethod(value.method) &&
-          value.expected &&
-          expectedOk(value.expected) ).length > 0;
+        entries.filter(([, value]) => checkSingleContractParameters(value)) || undefined;
 
-      return checked ? literals : undefined;
+      if (checked.length < entries.length) {
+        console.info(lang.contractCreationError);
+      }
+
+      return checked?.length > 0 ? literals : undefined;
     },
-    expected: lang.addContracts_Contract_Expected,
-    reportViolationsByDefault: true,
-  });
-  contracts.addContract({
-    name: `addContract_Contract`,
-    method: checkSingleContractParameters,
-    expected: lang.addContract_Contract_Expected,
-    reportViolationsByDefault: true,
-  });
-
-}
-
-function getViolationReport( params = destructuredPresets.reportViolations ) {
-  const { inputValue, defaultValue, shouldBe, fnName } = params;
-  const sorryDave = lang.report_sorry(fnName, formatInput(inputValue));
-  const forValue =  lang.report_forValue(sorryDave);
-  const itIsNot = lang.report_Expected(shouldBe);
-  const defaultVal = lang.report_defaultValue(isNothing(defaultValue), defaultValue);
-
-  return indent(`${forValue}${itIsNot}${defaultVal}`);
+    addContract_Contract: checkSingleContractParameters,
+  };
 }
 
 function indent(str, n = 3) {
   return str.replace(/\n/g, `\n${` `.repeat(n)}`);
 }
 
-function isNothing(val) {
-  return IS(val, undefined, null);
+function isNothing( val ) {
+  return IS(val, null, undefined);
 }
 
-function tryJSON(value) {
+function tryJSON( value ) {
   const trialLambda = () => {
     const trial = JSON.stringify(value);
     return /Infinity|NaN/.test(trial) ? trial.replace(/"/g, ``) : trial;
   };
 
-  return tryValue(trialLambda, value);
+  return tryValue( trialLambda, value );
 }
 
-function formatInput(inputValue) {
+function formatInput( inputValue ) {
   const arrayMapper = v =>
     IS(v, String) ? `"${v}"` :
       IS(v, Object) ? tryJSON(v) : String(v);
@@ -205,11 +168,11 @@ function formatInput(inputValue) {
         : String(inputValue);
 }
 
-function defaultViolationReporter(violationInfo) {
-  console.info(violationInfo);
+function defaultViolationReporter( violationInfo ) {
+  console.info( violationInfo );
 }
 
-function tryValue(lambda, valueRaw) {
+function tryValue( lambda, valueRaw ) {
   try { return lambda(); }
   catch(err) {
     console.error({ isOk: err.name === expected, message: err.message, type: err.name });

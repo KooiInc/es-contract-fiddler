@@ -111,8 +111,8 @@ function styleDocument($) {
       padding: 1.3rem;
     }`,
     `.violationPopup { padding: 0 1rem; }`,
-    `.explainerCode {
-      max-height: 800px;
+    `.codebox.explainerCode {
+      max-height: 1024px;
       max-width: calc(100% - 1px);
       opacity: 1;
       overflow: auto;

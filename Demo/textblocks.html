@@ -24,12 +24,11 @@ function plainString(value) {
 <template id="system">
 const reportDiv = $.div({id:"ViolationsReport"})
   .append($.h3("All logged contract violations"));
-
-  // [...]
-  function demoReporter(violationInfo) {
-    const infoOk = contracts.plainString(
-      violationInfo,
-      { extraInfo: "** Origin demo.js/demoReporter **" }
+// [...]
+function demoReporter(violationInfo) {
+  const infoOk = contracts.plainString(
+    violationInfo,
+    { extraInfo: "** Origin demo.js/demoReporter **" }
   );
 
   return infoOk ? reportDiv.append($.pre(infoOk)) : undefined;
@@ -318,7 +317,7 @@ const numerator = contracts.number(42);
     const { contracts, IS } = contractFactory({
       [reporter]: Function                      => the function to use for
                                                    reporting contract violations
-                                                =>  default violationInfo => console.info(violationInfo))
+                                                => default violationInfo => console.info(violationInfo))
       [logViolations]: boolean (default false), => log violations by default
                                                    using [reporter]
                                                    (otherwise log per contract)
@@ -327,7 +326,7 @@ const numerator = contracts.number(42);
     });
  */
 
- // initialize contracts (for demo a custom reporter function is used):
+ // initialize contracts (for demo a custom reporter function is used, see 'System'):
  const { contracts, IS } = contractFactory({reporter: demoReporter});
  //                 ^ the IS method is from the aforementioned typeofanything module.
 

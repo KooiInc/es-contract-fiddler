@@ -65,7 +65,6 @@ function newContractFactory( params ) {
     if ( IS(customMessageFn, Function) ) { customMessageFn(args4Reporting); }
 
     if ( doesNotResolve ) {
-      (name || methodName) === `divider` && console.log(value, args, args4Reporting);
       const expectedValue = IS(expected, Function) ? expected(args4Reporting) : expected;
       let valueDefault = defaultValue || args4Reporting.defaultValue;
 

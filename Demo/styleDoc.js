@@ -50,8 +50,14 @@ function styleDocument($) {
        padding: 8px;
        margin-left: -1em;
        ul {
-         margin: 0.4em 0 0 -0.3em;
+         margin: 0.4em 0 0 -1.3em;
          li[data-index-click] {
+            list-style: none;
+            &:before {
+              content: '\\2B0A';
+              display: inline-block;
+              margin-right: 8px;
+            }
             margin-top: 0.2em;
             cursor: pointer;
             &:hover {

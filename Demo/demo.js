@@ -1,21 +1,16 @@
-//import contractFactory from "../Bundle/es-contract.min.js";
-//import contractFactory from "../es-contract_nw.js";
 import contractFactory from "../es-contract.js";
 import {logFactory, $} from "https://unpkg.com/stackblitzhelpers@latest/index.browser.js";
+import splat from "https://unpkg.com/splat-es/Bundle/index.min.js";
 import styleDocument from "./styleDoc.js";
-const isSB = /stackblitz/i.test(location.href);
 const textBlocks = await importTexts();
-const { log:print } = logFactory();
+styleDocument($);
 const {contracts, IS,} = contractFactory({reporter: demoReporter});
-const world4TemplateString = `world`;
+const isSB = /stackblitz/i.test(location.href);
+const { log:print } = logFactory();
+const reportDiv = $.div({id:`ViolationsReport`}).append(`<h3>All logged contract violations</h3>`);
+createDemo();
 window.contracts = contracts;
 window.IS = IS;
-import auxText from "./textBlocks.js";
-const reportDiv = $.div({id:`ViolationsReport`}).append(`<h3>All logged contract violations</h3>`);
-styleDocument($);
-const allContracts = addContracts4Demo(contracts);
-createHandling();
-createDemo();
 
 function addContracts4Demo(contracts) {
   const { addContracts: addAll } = contracts;
@@ -168,7 +163,8 @@ function createHeaderAndExplanation() {
     ? `<p><a target="_top" href="//stackblitz.com/@KooiInc">All projects</a> | ` : ``;
   const githubLink = `<a target="${isSB ? `_blank` : `_top`}" href="https://github.com/KooiInc/es-contract-fiddler"
       >Github</a>`;
-  print(`${auxText.HeaderText(sbLink, githubLink)}
+
+  print(`!!${splat(textBlocks.pageheader, {sbLink, githubLink})}
     <p><button class="explainer closed">explainer</button>
     <button class="showViolations">Show contract violation logs</button></p>`,
     `!!${textBlocks.explainer}`);
@@ -189,6 +185,8 @@ function createHandling() {
 }
 
 function createDemo() {
+  addContracts4Demo(contracts);
+  createHandling();
   createHeaderAndExplanation();
 
   print(`!!<h2>Examples</h2>`);
@@ -202,6 +200,7 @@ function createDemo() {
   );
 
   // plainString
+  const world4TemplateString = `world`;
   print(`!!<h3>Contract: plainString</h3>`,
     codeToFormatted(textBlocks.plainString),
     `${toCode("contracts.plainString(`hello`)")}<br>=> ${

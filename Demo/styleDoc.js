@@ -112,7 +112,7 @@ function styleDocument($) {
     }`,
     `.violationPopup { padding: 0 1rem; }`,
     `.codebox.explainerCode {
-      max-height: 1024px;
+      max-height: 60vh;
       max-width: calc(100% - 1px);
       opacity: 1;
       overflow: auto;

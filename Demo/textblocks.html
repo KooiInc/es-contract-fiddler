@@ -232,14 +232,13 @@ contracts.divider: {
     return `${prefix}\nCause: ${message}`;
   };
 };
-// method
-function divider(...values) {
-  values = values.length < 2
-  ? [...Array(2)].map((_, i) => values?.[i])
-  : values;
 
-  let [numerator, denominator] = values;
-  denominator = IS(denominator, Number) && denominator > 0 ? denominator : 0;
+// method
+function divider(values) {
+  values = (IS(values, Array)
+  ? values.length < 2 ? [...Array(2)].map((_, i) => values?.[i]) : values.slice(0, 2)
+  : [values || 0, 0]);
+  const [numerator, denominator] = values;
   const result = numerator/denominator;
 
   return isFinite(result) ? result : undefined;

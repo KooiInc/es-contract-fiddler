@@ -119,6 +119,7 @@ const usageExample = someObj => {
 };
 contracts.myTypedObject = {
   method: function(obj) {
+    // note: contracts.plainString/-.int should exist here
     const expected = {
       first: val => IS(contracts?.plainString(val), String),
       second: val => contracts?.int(val), };

@@ -354,6 +354,8 @@ function createDemo() {
       JSON.stringify(contracts.myTypedObject({first: 42}, {reportViolation: true}))}`);
   print(`${toCode("contracts.myTypedObject({second: 42}, { reportViolation: true })")}<br>=> ${
     JSON.stringify(contracts.myTypedObject({second: 42}, {reportViolation: true}))}`);
+  print(`${toCode("contracts.myTypedObject({second: 42.1}, { reportViolation: true })")}<br>=> ${
+    JSON.stringify(contracts.myTypedObject({second: 42.1}, {reportViolation: true}))}`);
   print(`${toCode("contracts.myTypedObject({}, { reportViolation: true })")}<br>=> ${
     JSON.stringify(contracts.myTypedObject({}, {reportViolation: true}))}`);
   print(`${toCode("contracts.myTypedObject({first: [], second: `not valid`}, {reportViolation: true})")}

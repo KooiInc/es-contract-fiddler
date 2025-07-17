@@ -111,6 +111,12 @@ function myObject(obj) {
 <template id="myTypedObject">
 const validObject = { first: "number one", second: 42 };
 const invalidObject = { first: 42, second: "number one" };
+const usageExample = someObj => {
+  switch(true) {
+    case !!contracts.myTypedObject(someObj): return someObj;
+    default: return `Input INVALID!`
+  }
+};
 contracts.myTypedObject = {
   method: function(obj) {
     const expected = {

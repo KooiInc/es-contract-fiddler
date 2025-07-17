@@ -338,6 +338,12 @@ function createDemo() {
   /* region specified objects */
   const validObject = { first: "number one", second: 42 };
   const invalidObject = { first: 42, second: "number one" };
+  const usageExample = (someObj) => {
+    switch(true) {
+      case !!contracts.myTypedObject(someObj): return someObj;
+      default: return `Input INVALID!`
+    }
+  };
   print(`!!<h3>Contract: myTypedObject</h3>`);
   print(codeToFormatted(textBlocks.myTypedObject));
   print(`${toCode("contracts.myTypedObject({first: `The meaning of life may well be`, second: 42})")}
@@ -362,6 +368,8 @@ function createDemo() {
     JSON.stringify(contracts.myTypedObject(validObject) !== undefined)}`);
   print(`${toCode(`contracts.myTypedObject(invalidObject) !== undefined`)}<br>=> ${
     JSON.stringify(contracts.myTypedObject(invalidObject) !== undefined)}`);
+  print(`${toCode(`usageExample(validObject)`)}<br>=> ${JSON.stringify(usageExample(validObject))}`);
+  print(`${toCode(`usageExample(invalidObject)`)}<br>=> ${JSON.stringify(usageExample(invalidObject))}`);
   /* endregion specified objects */
 
   /* region numberBetween */

@@ -91,7 +91,7 @@ function newContractFactory( params ) {
       }
 
       return isBoolean && IS(valueDefault, Boolean) ? valueDefault :
-        IS(valueDefault, NaN) ? String(valueDefault) : valueDefault || undefined;
+        IS(valueDefault, NaN) ? NaN : valueDefault || undefined;
     }
 
     return resolved;

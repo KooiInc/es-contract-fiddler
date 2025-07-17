@@ -172,7 +172,7 @@ function createHeaderAndExplanation() {
 
 function createNavigation() {
   const index = $.ul();
-  const lis = $(`h3`).collection
+  $(`h3`).collection
     .filter(h => h.textContent.startsWith(`Contract`))
     .map(el => {
       el.dataset.id = el.textContent.split(":")[1].trim();
@@ -254,6 +254,7 @@ function createDemo() {
   print(`!!<h3>Contract: bool</h3>`);
   print(codeToFormatted(textBlocks.bool));
   print(`${toCode("bool()")} => ${bool()}`);
+  // noinspection PointlessBooleanExpressionJS
   print(`${toCode("bool(!!!undefined)")} => ${bool(!!!undefined)}`);
   print(`${toCode("bool('hello')")} => ${bool(`hello`)}`);
   print(`${toCode("bool(0)")} => ${bool(0)}`);

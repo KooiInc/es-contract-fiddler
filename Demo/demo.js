@@ -161,10 +161,11 @@ function createHeaderAndExplanation() {
   $(`<div class="container">`).append($.span({class:"top"}), $(`#log2screen`));
   const sbLink = isSB
     ? `<p><a target="_top" href="//stackblitz.com/@KooiInc">All projects</a> | ` : ``;
-  const githubLink = `<a target="${isSB ? `_blank` : `_top`}" href="https://github.com/KooiInc/es-contract-fiddler"
-      >Github</a>`;
-
-  print(`!!${splat(textBlocks.pageheader, {sbLink, githubLink})}
+  const backToRepoLink = `<a target="${isSB ? `_blank` : `_top`}" href="https://codeberg.org/KooiInc/es-contract-fiddler"
+      >Repository</a>`;
+  const githubLink = `<a target="_blank" href="https://github.com/KooiInc/es-contract-fiddler"
+      >@Github</a>`
+  print(`!!${splat(textBlocks.pageheader, {sbLink, backToRepoLink, githubLink})}
     <p><button class="explainer closed">explainer</button>
     <button class="showViolations">Show contract violation logs</button></p>`,
     `!!${textBlocks.explainer}`);

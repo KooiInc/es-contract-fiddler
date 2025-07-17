@@ -158,7 +158,7 @@ function addContracts4Demo(contracts) {
 
 function createHeaderAndExplanation() {
   !isSB && console.clear();
-  $(`<div class="container">`).append($(`#log2screen`));
+  $(`<div class="container">`).append($.span({class:"top"}), $(`#log2screen`));
   const sbLink = isSB
     ? `<p><a target="_top" href="//stackblitz.com/@KooiInc">All projects</a> | ` : ``;
   const githubLink = `<a target="${isSB ? `_blank` : `_top`}" href="https://github.com/KooiInc/es-contract-fiddler"
@@ -170,7 +170,28 @@ function createHeaderAndExplanation() {
     `!!${textBlocks.explainer}`);
 }
 
+function createNavigation() {
+  const index = $.ul();
+  const lis = $(`h3`).collection
+    .filter(h => h.textContent.startsWith(`Contract`))
+    .map(el => {
+      el.dataset.id = el.textContent.split(":")[1].trim();
+      index.append($.li({data: {indexClick: true, forId: el.dataset.id}}, el.textContent))
+    });
+
+  $.div(
+    {class: "index"},
+    $.h3({class: "between"}, `Index`),
+    index )
+  .renderTo($(`#log2screen li:nth-child(2)`), $.at.afterend);
+
+  $.span({class: "toTop", title: `back to top`})
+    .css({left: `${$(`#log2screen`).dimensions.right - 40}px`})
+    .renderTo(document.body);
+}
+
 function createHandling() {
+  const smooth = {behavior: "smooth"};
   $.delegate( `click`, `.showViolations`, () =>
     $.Popup.show({ content: `<div class="violationPopup">${reportDiv.HTML.get()}</div>` }) );
   $.delegate(`click`, `.explainer`, (_, self) => {
@@ -183,6 +204,12 @@ function createHandling() {
         self.addClass(closed);
         return $(`.explainerCode`).addClass(`closed`);
     }
+  });
+  $.delegate(`click`, `[data-for-id]`, (_, self) => {
+    $.node(`[data-id="${self.data.get(`forId`)}"]`)?.scrollIntoView(smooth);
+  });
+  $.delegate(`click`, `span.toTop`, () => {
+    $.node(`.top`)?.scrollIntoView(smooth);
   });
 }
 
@@ -274,7 +301,7 @@ function createDemo() {
   print(`${toCode("[...[1,2,,3,4,`NADA`,,42.1,5]].map(v => contracts.int(v, {defaultValue: NaN}))")}<br>=> [${
     [...[1,2,,3,4,`NADA`,,,42.1,5]].map((v) => contracts.int(v, {defaultValue: NaN}))}]
     <br><b>Note</b>: ${toCode(`Array.map`)} will not process empty slots of an array.
-    <br>${toCode(`[...[1,2,3,4,\`NADA\`,,,42.01,5]]`)} converts empty slots to
+    <br>A copy (${toCode(`[...[1,2,3,4,\`NADA\`,,,42.01,5]]`)}) of the array converts empty slots to
       slots with value ${toCode(`undefined`)}<br>so ${toCode(`{defaultValue: NaN}`)} will be be
       honored`);
   /* endregion int */
@@ -415,6 +442,7 @@ function createDemo() {
   /* endregion shouldThrow */
 
   hljs.highlightAll(`javascript`);
+  createNavigation();
 }
 
 function demoReporter(violationInfo) {

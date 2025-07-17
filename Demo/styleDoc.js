@@ -26,12 +26,41 @@ function styleDocument($) {
       display: inline-block;
       margin: 1rem auto 0.5rem auto;
     }`,
+    `span.toTop {
+      position: fixed;
+      top: 20px;
+      cursor: pointer;
+      &:after {
+        content: '\\261D';
+        padding: 4px;
+        font-size: 2rem;
+        display: inline-block;
+      }
+    }`,
+    `h3[data-id] { scroll-margin-top: 20px; }`,
     `h3.between {
       color: cornflowerblue;
       margin: -0.5rem 0 -0.5rem 0;
       display: inline-block;
       border: none;
      }`,
+    `#log2screen div.index {
+       margin-top: 1.5rem;
+       border: 1px dotted #999;
+       padding: 8px;
+       margin-left: -1em;
+       ul {
+         margin: 0.4em 0 0 -0.3em;
+         li[data-index-click] {
+            margin-top: 0.2em;
+            cursor: pointer;
+            &:hover {
+              color: blue;
+              text-decoration: underline;
+         }
+       }
+      }
+    }`,
     `pre.codebox {
       box-shadow: 2px 2px 6px #555;
       border-radius: 6px;

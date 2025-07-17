@@ -68,6 +68,8 @@ function newContractFactory( params ) {
       const expectedValue = IS(expected, Function) ? expected(args4Reporting) : expected;
       let valueDefault = defaultValue || args4Reporting.defaultValue;
 
+      (name || method.name) === `int` && console.log(valueDefault);
+
       const [doReport, throwIt] = [
         args4Reporting.reportViolation ?? reportViolationsByDefault,
         args4Reporting.shouldThrow ?? shouldThrow ];
@@ -88,7 +90,8 @@ function newContractFactory( params ) {
         reporter(aggregatedReport);
       }
 
-      return isBoolean && IS(valueDefault, Boolean) ? valueDefault : valueDefault || undefined;
+      return isBoolean && IS(valueDefault, Boolean) ? valueDefault :
+        IS(valueDefault, NaN) ? String(valueDefault) : valueDefault || undefined;
     }
 
     return resolved;
@@ -104,7 +107,6 @@ function getViolationReport( params ) {
 
   return indent(`${forValue}${itIsNot}${hasDefaultValue && lang.report_defaultValue(defaultValue) || ``}`);
 }
-
 
 function getFactoryContractCheckMethods() {
   const nameOk = name => IS(name, String) && name.trim().length;

@@ -70,6 +70,7 @@ function demoReporter(violationInfo) {
 </template>
 
 <template id="arrayOfNumbers">
+const origin4Log = {origin: `** from demo contract.arrayOfNumbers **`};
 contracts.arrayOfNumbers = {
   method(arr) {
     return IS(arr, Array) && arr.length && !arr.find(v => !IS(v, Number)) ? arr : undefined;

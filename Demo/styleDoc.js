@@ -125,6 +125,9 @@ function styleDocument($) {
       position: absolute;
       overflow: hidden;
     }`,
+    `li > code.inline, li > div {
+      vertical-align: top;
+    }`,
     `code.inline {
       background-color: rgb(227, 230, 232);
       color: rgb(12, 13, 14);

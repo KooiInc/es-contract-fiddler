@@ -3,7 +3,6 @@ import {logFactory, $} from "https://unpkg.com/stackblitzhelpers@latest/index.br
 import splat from "https://unpkg.com/splat-es/Bundle/index.min.js";
 import styleDocument from "./styleDoc.js";
 const textBlocks = await importTexts();
-styleDocument($);
 const {contracts, IS,} = contractFactory({reporter: demoReporter});
 const isSB = /stackblitz/i.test(location.href);
 const { log:print } = logFactory();
@@ -11,6 +10,27 @@ const reportDiv = $.div({id:`ViolationsReport`}).append(`<h3>All logged contract
 createDemo();
 window.contracts = contracts;
 window.IS = IS;
+
+function createDemo() {
+  styleDocument($);
+  addContracts4Demo(contracts);
+  createHandling();
+  createHeaderAndExplanation();
+  print(`!!<h2>Examples</h2>`);
+  demoSystem();
+  demoPlainString();
+  demoBool();
+  demoNumber();
+  demoInt();
+  demoArrayOfNumber();
+  demoObjects();
+  demoTypedObjects();
+  demoNumberBetween();
+  demoDividers();
+  demoThrow();
+  hljs.highlightAll(`javascript`);
+  createNavigation();
+}
 
 function addContracts4Demo(contracts) {
   const { addContracts: addAll } = contracts;
@@ -214,145 +234,150 @@ function createHandling() {
   });
 }
 
-function createDemo() {
-  addContracts4Demo(contracts);
-  createHandling();
-  createHeaderAndExplanation();
-
-  print(`!!<h2>Examples</h2>`);
-
-  /* region 'system' */
+function demoSystem() {
   print(
     `!!<h3>System</h3>`,
     codeToFormatted(textBlocks.system),
     `Contracts added, testing demoReporter without input: <code class="inline">demoReporter()</code>
     <br> => ${demoReporter()} (see contract violation logs)`
   );
-  /* endregion 'system' */
+}
 
-  /* region plainString */
+function demoPlainString() {
   const world4TemplateString = `world`;
-  print(`!!<h3>Contract: plainString</h3>`,
+  print(
+    `!!<h3>Contract: plainString</h3>`,
     codeToFormatted(textBlocks.plainString),
-    `${toCode("contracts.plainString(`hello`)")}<br>=> ${
-    contracts.plainString(`hello`) }`
+    `${toCode("contracts.plainString(`hello`)")} => ${
+      contracts.plainString(`hello`) }`,
+    `${toCode("contracts.plainString(`hello ${world4TemplateString}`)")} => ${
+    contracts.plainString(`hello ${world4TemplateString}`)}`,
+    `${toCode("contracts.plainString()")} => ${
+    contracts.plainString()}`,
+    `${toCode("contracts.plainString([1,2,3])")} => ${contracts.plainString([1,2,3])}`,
+    `${toCode("contracts.plainString([1,2,3], {defaultValue: `Nothing`, reportViolation: true})")} => ${
+    contracts.plainString([1,2,3], {defaultValue: `Nothing`, reportViolation: true})}`,
+    `${toCode("contracts.plainString(undefined, {extraInfo: `**Logged by the 'expected' function in contracts.plainString**`})")}
+    <br>=> ${contracts.plainString(undefined, {extraInfo: `**Logged by the 'expected' function in contracts.plainString**`})}`
   );
-  print(`${toCode("contracts.plainString(`hello ${world4TemplateString}`)")}<br>=> ${
-    contracts.plainString(`hello ${world4TemplateString}`)}`);
-  print(`${toCode("contracts.plainString()")}<br>=> ${
-    contracts.plainString()}`);
-  print(`${toCode("contracts.plainString([1,2,3])")}<br>=> ${contracts.plainString([1,2,3])}`);
-  print(`${toCode("contracts.plainString([1,2,3], {defaultValue: `Nothing`, reportViolation: true})")}<br>=> ${
-    contracts.plainString([1,2,3], {defaultValue: `Nothing`, reportViolation: true})}`);
-  print(`${
-    toCode("contracts.plainString(undefined, {extraInfo: `**Logged by the 'expected' function in contracts.plainString**`})")}
-    <br>=> ${contracts.plainString(undefined, {extraInfo: `**Logged by the 'expected' function in contracts.plainString**`})}`);
-  /* endregion plainString */
+}
 
-  /* region bool */
+function demoBool() {
   const compareValue = false;
   const {bool} = contracts;
-  print(`!!<h3>Contract: bool</h3>`);
-  print(codeToFormatted(textBlocks.bool));
-  print(`${toCode("bool()")} => ${bool()}`);
-  // noinspection PointlessBooleanExpressionJS
-  print(`${toCode("bool(!!!undefined)")} => ${bool(!!!undefined)}`);
-  print(`${toCode("bool('hello')")} => ${bool(`hello`)}`);
-  print(`${toCode("bool(0)")} => ${bool(0)}`);
-  print(`${toCode("bool(!!0)")} => ${bool(!!0)}`);
-  print(`${toCode("bool(new Boolean())")} => ${bool(new Boolean())}`);
-  print(`${toCode("bool(new Boolean(true))")} => ${bool(new Boolean(true))}`);
-  print(`${toCode("bool(!!`hello`)")} => ${bool(!!`hello`)}`);
-  print(`${toCode("bool([0, 1, 2])")} => ${bool([0, 1, 2])}`);
-  print(`${toCode("bool(true)")} => ${bool(true)}`);
-  print(`${toCode("bool(false)")} => ${bool(false)}`);
-  print(`${toCode("bool(true) === compareValue")} => ${bool(true) === compareValue}`);
-  print(`${toCode("bool(false) === compareValue")} => ${bool(false) === compareValue}`);
-  print(`${toCode("bool(null, {defaultValue: false})")} => ${
-    bool(null, {defaultValue: false})}`);
-  print(`${toCode("bool(null, {defaultValue: false}) === compareValue")} => ${
-    bool(null, {defaultValue: false})  === compareValue}`);
-  print(`${toCode("bool(compareValue) !== undefined")} => ${
-    bool(compareValue) !== undefined }`);
-  /* endregion bool */
+  print(
+    `!!<h3>Contract: bool</h3>`,
+    codeToFormatted(textBlocks.bool),
+    `${toCode("bool()")} => ${bool()}`,
+    // noinspection PointlessBooleanExpressionJS
+    `${toCode("bool(!!!undefined)")} => ${bool(!!!undefined)}`,
+    `${toCode("bool('hello')")} => ${bool(`hello`)}`,
+    `${toCode("bool(0)")} => ${bool(0)}`,
+    `${toCode("bool(!!0)")} => ${bool(!!0)}`,
+    `${toCode("bool(new Boolean())")} => ${bool(new Boolean())}`,
+    `${toCode("bool(new Boolean(true))")} => ${bool(new Boolean(true))}`,
+    `${toCode("bool(!!`hello`)")} => ${bool(!!`hello`)}`,
+    `${toCode("bool([0, 1, 2])")} => ${bool([0, 1, 2])}`,
+    `${toCode("bool(true)")} => ${bool(true)}`,
+    `${toCode("bool(false)")} => ${bool(false)}`,
+    `${toCode("bool(true) === compareValue")} => ${bool(true) === compareValue}`,
+    `${toCode("bool(false) === compareValue")} => ${bool(false) === compareValue}`,
+    `${toCode("bool(null, {defaultValue: false})")} => ${
+      bool(null, {defaultValue: false})}`,
+    `${toCode("bool(null, {defaultValue: false}) === compareValue")} => ${
+      bool(null, {defaultValue: false})  === compareValue}`,
+    `${toCode("bool(compareValue) !== undefined")} => ${
+      bool(compareValue) !== undefined }`
+  );
+}
 
-  /* region number */
-  print(`!!<h3>Contract: number</h3>`);
-  print(codeToFormatted(textBlocks.number));
-  print(`${toCode("contracts.number()")}<br>=> ${contracts.number()}`);
-  print(`${toCode("contracts.number(`NaN`, {reportViolation: true})")}<br>=> ${
-    contracts.number(`NaN`, {reportViolation: true})}`);
-  print(`${toCode("contracts.number(undefined, {defaultValue: 42, reportViolation: true})")}<br>=> ${
-    contracts.number(undefined, {defaultValue: 42, reportViolation: true})}`);
-  print(`${toCode("contracts.number(13.22)")}<br>=> ${contracts.number(13.22)}`);
-  print(`${
+function demoNumber() {
+  print(
+    `!!<h3>Contract: number</h3>`,
+    codeToFormatted(textBlocks.number),
+    `${toCode("contracts.number()")} => ${contracts.number()}`,
+    `${toCode("contracts.number(`NaN`, {reportViolation: true})")} => ${
+    contracts.number(`NaN`, {reportViolation: true})}`,
+    `${toCode("contracts.number(undefined, {defaultValue: 42, reportViolation: true})")} => ${
+    contracts.number(undefined, {defaultValue: 42, reportViolation: true})}`,
+    `${toCode("contracts.number(13.22)")} => ${contracts.number(13.22)}`,
+    `${
     toCode("[1,2,3,4,`not number`,41.9999,5].filter(v => " +
       "<br>&nbsp;&nbsp;contracts.number(v, {origin: `** from array filter lambda **`, reportViolation: true})")}
     <br>=> [${
-    [1,2,3,4,`not number`,41.9999,5].filter(v =>
+    [1, 2, 3, 4, `not number`, 41.9999, 5].filter(v =>
       contracts.number(v, {origin: `** from array filter lambda **`, reportViolation: true}))}]`);
-  /* endregion number */
+}
 
-  /* region int */
-  print(`!!<h3>Contract: int</h3>`)
-  print(codeToFormatted(textBlocks.int));
-  print(`${toCode("contracts.int(42)")}<br>=> ${contracts.int(42)}`);
-  print(`${toCode("contracts.int(42.1)")}<br>=> ${contracts.int(42.1)}`);
-  print(`${toCode("[1,2,3,4,`nothing`,,,41.999,5].filter(contracts.int)")}<br>=> [${
-    [1,2,3,4,`nothing`,,,41.999,5].filter(contracts.int)}]`);
-  print(`${toCode("[...[1,2,,3,4,`NADA`,,42.1,5]].map(v => contracts.int(v, {defaultValue: NaN}))")}<br>=> [${
+function demoInt() {
+  print(
+    `!!<h3>Contract: int</h3>`,
+    codeToFormatted(textBlocks.int),
+
+    `${toCode("contracts.int(42)")} => ${contracts.int(42)}`,
+
+    `${toCode("contracts.int(42.1)")} => ${contracts.int(42.1)}`,
+
+    `${toCode("[1,2,3,4,`nothing`,,,41.999,5].filter(contracts.int)")} => [${
+    [1,2,3,4,`nothing`,,,41.999,5].filter(contracts.int)}]`,
+
+    `${toCode("[...[1,2,,3,4,`NADA`,,42.1,5]].map(v => contracts.int(v, {defaultValue: NaN}))")}<br>=> [${
     [...[1,2,,3,4,`NADA`,,,42.1,5]].map((v) => contracts.int(v, {defaultValue: NaN}))}]
     <div><b>Note</b>: ${toCode(`Array.map`)} will <i>not</i> process empty slots of an array.</div>
     <div>A <i>copy</i> (${toCode(`[...[1,2,3,4,\`NADA\`,,,42.01,5]]`)}) of the array 
       converts empty slots to slots with value ${toCode(`undefined`)},
       so in that case ${toCode(`{defaultValue: NaN}`)} will be be honored</div>`);
-  /* endregion int */
+}
 
-  /* region arrayOfNumber */
-  const origin4Log = { origin: `** from demo contract.arrayOfNumbers **` };
-  print(`!!<h3>Contract: arrayOfNumbers</h3>
-    <div><b>Note</b>: Violations logged with [origin4Log]: ${
-      toCode("{origin: `** from demo contract.arrayOfNumbers **`}")}</div>`);
-  print(codeToFormatted(textBlocks.arrayOfNumbers));
-  print(`${toCode("contracts.arrayOfNumbers()")}<br>=> ${
-    contracts.arrayOfNumbers()}`);
-  print(`${toCode("contracts.arrayOfNumbers([], origin4Log)")}<br>=> ${
-    contracts.arrayOfNumbers([], origin4Log)}`);
-  print(`${toCode("contracts.arrayOfNumbers([10, 1000, 3], origin4Log)")}
-    <br>=> [${contracts.arrayOfNumbers([10, 1000, 3], origin4Log)}]`);
-  print(`${
-    toCode("contracts.arrayOfNumbers([10, \"1000\", 3], origin4Log)")}
-    <br>=> ${contracts.arrayOfNumbers([10, "1000", 3], origin4Log)}`);
-  print(`${
-    toCode("contracts.arrayOfNumbers({0: 1, 1: 2, 2: 3}, origin4Log)")}
-    <br>=> ${contracts.arrayOfNumbers({0: 1, 1: 2, 2: 3}, origin4Log)}`);
-  /* endregion arrayOfNumber */
+function demoArrayOfNumber() {
+  const origin4Log = {origin: `** from demo contract.arrayOfNumbers **`};
+  print(
+    `!!<h3>Contract: arrayOfNumbers</h3>
+    <div><b>Note</b>: Violations logged with [origin4Log]</div>`,
+    codeToFormatted(textBlocks.arrayOfNumbers),
+    `${toCode("contracts.arrayOfNumbers()")} => ${contracts.arrayOfNumbers()}`,
+    `${toCode("contracts.arrayOfNumbers([], origin4Log)")} => ${contracts.arrayOfNumbers([], origin4Log)}`,
+    `${toCode("contracts.arrayOfNumbers([10, 1000, 3], origin4Log)")} => [${
+      contracts.arrayOfNumbers([10, 1000, 3], origin4Log)}]`,
+    `${toCode("contracts.arrayOfNumbers([10, \"1000\", 3], origin4Log)")} => ${
+      contracts.arrayOfNumbers([10, "1000", 3], origin4Log)}`,
+    `${toCode("contracts.arrayOfNumbers({0: 1, 1: 2, 2: 3}, origin4Log)")} => ${
+      contracts.arrayOfNumbers({0: 1, 1: 2, 2: 3}, origin4Log)}`
+  );
+}
 
-  /* region objects */
-  const obj1 = toCode("contracts.myObject({hello: `hello`, world: `world`, universe: `universe`})");
-  const obj2 = toCode("contracts.myTypedObject({first: ``, second: 42}");
-  print(`!!<h3>Contract: myObject</h3>`)
-  print(codeToFormatted(textBlocks.myObject));
-  print(`${obj1}<br>=> ${JSON.stringify(contracts.myObject({hello: `hello`, world: `world`, universe: `universe`}))}`);
-  print(`${toCode("contracts.myObject({world: `world`}))")}<br>=> ${JSON.stringify(contracts.myObject({world: `world`}))}`);
-  /* endregion objects */
+function demoObjects() {
+  print(
+    `!!<h3>Contract: myObject</h3>`,
+    codeToFormatted(textBlocks.myObject),
+    `${toCode("contracts.myObject({hello: `hello`, world: `world`, universe: `universe`})")}<br>=> ${
+      JSON.stringify(contracts.myObject({hello: `hello`, world: `world`, universe: `universe`}))}`,
+    `${toCode("contracts.myObject({world: `world`}))")} => ${
+      JSON.stringify(contracts.myObject({world: `world`}))}`,
+  );
+}
 
-  /* region specified objects */
-  const validObject = { first: "number one", second: 42 };
-  const invalidObject = { first: 42, second: "number one" };
+function demoTypedObjects() {
+  const validObject = {first: "number one", second: 42};
+  const invalidObject = {first: 42, second: "number one"};
   const usageExample = (someObj) => {
-    switch(true) {
-      case !!contracts.myTypedObject(someObj): return someObj;
-      default: return `Input INVALID!`
+    switch (true) {
+      case !!contracts.myTypedObject(someObj):
+        return someObj;
+      default:
+        return `Input INVALID!`
     }
   };
   print(`!!<h3>Contract: myTypedObject</h3>`);
   print(codeToFormatted(textBlocks.myTypedObject));
   print(`${toCode("contracts.myTypedObject({first: `The meaning of life may well be`, second: 42})")}
     <br>=> ${
-      JSON.stringify(contracts.myTypedObject({first: `The meaning of life may well be`, second: 42}, {reportViolation: true}))}`);
+    JSON.stringify(contracts.myTypedObject({
+      first: `The meaning of life may well be`,
+      second: 42
+    }, {reportViolation: true}))}`);
   print(`${toCode("contracts.myTypedObject({first: 42}, { reportViolation: true })")}<br>=> ${
-      JSON.stringify(contracts.myTypedObject({first: 42}, {reportViolation: true}))}`);
+    JSON.stringify(contracts.myTypedObject({first: 42}, {reportViolation: true}))}`);
   print(`${toCode("contracts.myTypedObject({second: 42}, { reportViolation: true })")}<br>=> ${
     JSON.stringify(contracts.myTypedObject({second: 42}, {reportViolation: true}))}`);
   print(`${toCode("contracts.myTypedObject({second: 42.1}, { reportViolation: true })")}<br>=> ${
@@ -364,8 +389,13 @@ function createDemo() {
     JSON.stringify(contracts.myTypedObject({first: [], second: `not valid`}, {reportViolation: true}))}`);
   print(`${toCode("contracts.myTypedObject({first: `The meaning of life`, second: 42, third: `NO!`})")}
   <br>=> ${
-    JSON.stringify(contracts.myTypedObject({first: `The meaning of life`, second: 42, third: `NO!`}, {reportViolation: true}))}`);
-  print(`${obj2}<br>=> ${JSON.stringify(contracts.myTypedObject({first: ``, second: 42}))}`);
+    JSON.stringify(contracts.myTypedObject({
+      first: `The meaning of life`,
+      second: 42,
+      third: `NO!`
+    }, {reportViolation: true}))}`);
+  print(`${toCode("contracts.myTypedObject({first: ``, second: 42}))")}<br>=> ${
+    JSON.stringify(contracts.myTypedObject({first: ``, second: 42}))}`);
   print(`${toCode(`contracts.myTypedObject({first: null, second: 42})`)}<br>=> ${
     JSON.stringify(contracts.myTypedObject({first: null, second: 42}))}`);
   print(`${toCode(`contracts.myTypedObject(validObject) !== undefined`)}<br>=> ${
@@ -374,29 +404,30 @@ function createDemo() {
     JSON.stringify(contracts.myTypedObject(invalidObject) !== undefined)}`);
   print(`${toCode(`usageExample(validObject)`)}<br>=> ${JSON.stringify(usageExample(validObject))}`);
   print(`${toCode(`usageExample(invalidObject)`)}<br>=> ${JSON.stringify(usageExample(invalidObject))}`);
-  /* endregion specified objects */
+}
 
-  /* region numberBetween */
+function demoNumberBetween() {
   const isBetween = value => value !== undefined;
-  print(`!!<h3>Contract: numberBetween</h3>`);
-  print(toFormattedCode(textBlocks.numberBetween));
-  print(`${toCode("contracts.numberBetween({nr: 17, min: 16, max: 20})")} => ${
-    contracts.numberBetween(17, {min: 16, max: 20})}`);
-  print(`${toCode("contracts.numberBetween({nr: 15, min: 15, max: 120, inclusive: true})")}<br>=> ${
-    contracts.numberBetween(15, {min: 15, max: 120, inclusive: true})}`);
-  print(`${toCode("contracts.numberBetween({nr: 15, min: 15, max: 120, reportViolation: true})")}<br>=> ${
-    contracts.numberBetween(15, {min: 15, max: 120, reportViolation: true})}`);
-  print(`${toCode("contracts.numberBetween(149, {min: 150, max: 1200, inclusive: true, reportViolation: true})")}<br>=> ${
-    contracts.numberBetween(149, {min: 150, max: 1200, inclusive: true, reportViolation: true})}`);
-  print(`${toCode("isBetween(contracts.numberBetween(175, {min: 150, max: 1200, inclusive: true, reportViolation: true}))")}<br>=> ${
-    isBetween(contracts.numberBetween(175, {min: 150, max: 1200, inclusive: true, reportViolation: true}))}`);
-  print(`${toCode("isBetween(contracts.numberBetween(42, {min: 150}))")} (actually '> 150') <br>=> ${
-    isBetween(contracts.numberBetween(42, {min: 150}))}`);
-  print(`${toCode("isBetween(contracts.numberBetween(42, {max: 100}))")} (actually '< 100') <br>=> ${
-    isBetween(contracts.numberBetween(42, {max: 100}))}`);
-  /* endregion numberBetween */
+  print(`!!<h3>Contract: numberBetween</h3>`,
+    toFormattedCode(textBlocks.numberBetween),
+    `${toCode("contracts.numberBetween({nr: 17, min: 16, max: 20})")} => ${
+    contracts.numberBetween(17, {min: 16, max: 20})}`,
+    `${toCode("contracts.numberBetween({nr: 15, min: 15, max: 120, inclusive: true})")}<br>=> ${
+    contracts.numberBetween(15, {min: 15, max: 120, inclusive: true})}`,
+    `${toCode("contracts.numberBetween({nr: 15, min: 15, max: 120, reportViolation: true})")}<br>=> ${
+    contracts.numberBetween(15, {min: 15, max: 120, reportViolation: true})}`,
+    `${toCode("contracts.numberBetween(149, {min: 150, max: 1200, inclusive: true, reportViolation: true})")}<br>=> ${
+    contracts.numberBetween(149, {min: 150, max: 1200, inclusive: true, reportViolation: true})}`,
+    `${toCode("isBetween(contracts.numberBetween(175, {min: 150, max: 1200, inclusive: true, reportViolation: true}))")}<br>=> ${
+    isBetween(contracts.numberBetween(175, {min: 150, max: 1200, inclusive: true, reportViolation: true}))}`,
+    `${toCode("isBetween(contracts.numberBetween(42, {min: 150}))")} (actually '> 150') <br>=> ${
+    isBetween(contracts.numberBetween(42, {min: 150}))}`,
+    `${toCode("isBetween(contracts.numberBetween(42, {max: 100}))")} (actually '< 100') <br>=> ${
+    isBetween(contracts.numberBetween(42, {max: 100}))}`
+  );
+}
 
-  /* region numberNotZero, divide and divider */
+function demoDividers() {
   const denominator = contracts.numberNotZero(0, {reportViolation: true});
   const numerator = contracts.number(42);
   print(`!!<h3>Contracts: numberNotZero, divide and divider</h3>`);
@@ -405,15 +436,15 @@ function createDemo() {
   print(codeToFormatted(textBlocks.dividerVars));
 
   print(
-    `${toCode("numerator/denominator")} //=> ${ numerator/denominator }`,
-    `${toCode("numerator/contracts.numberNotZero(3)")} //=> ${numerator/contracts.numberNotZero(3)}`,
-    `${toCode("numerator/contracts.numberNotZero(numerator)")} //=> ${numerator/contracts.numberNotZero(42)}`,
-    `${toCode("numerator/contracts.numberNotZero(0)")} => ${numerator/contracts.numberNotZero(0)}`,
-    `${toCode("numerator/contracts.numberNotZero()")} => ${numerator/contracts.numberNotZero()}`,
+    `${toCode("numerator/denominator")} //=> ${numerator / denominator}`,
+    `${toCode("numerator/contracts.numberNotZero(3)")} //=> ${numerator / contracts.numberNotZero(3)}`,
+    `${toCode("numerator/contracts.numberNotZero(numerator)")} //=> ${numerator / contracts.numberNotZero(42)}`,
+    `${toCode("numerator/contracts.numberNotZero(0)")} => ${numerator / contracts.numberNotZero(0)}`,
+    `${toCode("numerator/contracts.numberNotZero()")} => ${numerator / contracts.numberNotZero()}`,
   );
 
   print(
-    $.h3({class: `between`, data: {header: true} }, `contracts.divide`),
+    $.h3({class: `between`, data: {header: true}}, `contracts.divide`),
     codeToFormatted(textBlocks.divide)
   );
 
@@ -424,7 +455,7 @@ function createDemo() {
   );
 
   print(
-    $.h3({class: `between`, data: {header: true} }, `contracts.divider`),
+    $.h3({class: `between`, data: {header: true}}, `contracts.divider`),
     codeToFormatted(textBlocks.divider)
   );
 
@@ -440,9 +471,9 @@ function createDemo() {
     `${toCode("contracts.divider(2.5)")} //=> ${contracts.divider([2.5])}`,
     `${toCode("contracts.divider(2.5, '2.5')")} //=> ${contracts.divider([2.5, "2.5"])}`,
   )
-  /* endregion numberNotZero, divide and divider */
+}
 
-  /* region shouldThrow */
+function demoThrow() {
   print(`!!<h3>shouldThrow</h3>`);
   print(codeToFormatted(textBlocks.shouldThrow));
 
@@ -451,10 +482,6 @@ function createDemo() {
   } catch(err) {
     console.error([err.name, err.stack.replace(`${err.name}: `, ``)].join(`\n`));
     print(`!!=> <b class="warn">${err.name} thrown</b><pre class="noTopMargin">${err.message}</pre>`); }
-  /* endregion shouldThrow */
-
-  hljs.highlightAll(`javascript`);
-  createNavigation();
 }
 
 function demoReporter(violationInfo) {

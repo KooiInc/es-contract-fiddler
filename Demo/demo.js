@@ -408,6 +408,7 @@ function demoTypedObjects() {
 
 function demoNumberBetween() {
   const isBetween = value => value !== undefined;
+  const [b0, b1, b2] = [149, 150, 1200];
   print(`!!<h3>Contract: numberBetween</h3>`,
     toFormattedCode(textBlocks.numberBetween),
     `${toCode("contracts.numberBetween({nr: 17, min: 16, max: 20})")} => ${
@@ -416,13 +417,14 @@ function demoNumberBetween() {
     contracts.numberBetween(15, {min: 15, max: 120, inclusive: true})}`,
     `${toCode("contracts.numberBetween({nr: 15, min: 15, max: 120, reportViolation: true})")}<br>=> ${
     contracts.numberBetween(15, {min: 15, max: 120, reportViolation: true})}`,
-    `${toCode("contracts.numberBetween(149, {min: 150, max: 1200, inclusive: true, reportViolation: true})")}<br>=> ${
-    contracts.numberBetween(149, {min: 150, max: 1200, inclusive: true, reportViolation: true})}`,
+    `${toCode("contracts.numberBetween(b0, {min: 150, max: 1200, inclusive: true, reportViolation: true})")}<br>=> ${
+    contracts.numberBetween(b0, {min: 150, max: 1200, inclusive: true, reportViolation: true})}`,
+
     $.h3({class: "between", data: {header: true}}, `usage: isBetween`),
-    `${toCode("isBetween(contracts.numberBetween(150, {min: 150, max: 1200, inclusive: true, reportViolation: true}))")}<br>=> ${
-      isBetween(contracts.numberBetween(150, {min: 150, max: 1200, inclusive: true, reportViolation: true}))}`,
-    `${toCode("isBetween(contracts.numberBetween(1200, {min: 150, max: 1200, reportViolation: true}))")}<br>=> ${
-      isBetween(contracts.numberBetween(1200, {min: 150, max: 1200, reportViolation: true}))}`,
+    `${toCode(`isBetween(contracts.numberBetween(b1, {min: 150, max: 1200, inclusive: true, reportViolation: true}))`)}<br>=> ${
+      isBetween(contracts.numberBetween(b1, {min: b1, max: 1200, inclusive: true, reportViolation: true}))}`,
+    `${toCode("isBetween(contracts.numberBetween(b2, {min: 150, max: 1200, reportViolation: true}))")}<br>=> ${
+      isBetween(contracts.numberBetween(b2, {min: b2, max: 1200, reportViolation: true}))}`,
     `${toCode("isBetween(contracts.numberBetween(42, {min: 150}))")} (actually '> 150') <br>=> ${
     isBetween(contracts.numberBetween(42, {min: 150}))}`,
     `${toCode("isBetween(contracts.numberBetween(42, {max: 100}))")} (actually '< 100') <br>=> ${

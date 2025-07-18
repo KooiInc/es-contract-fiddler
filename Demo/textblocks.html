@@ -162,6 +162,7 @@ try {
 
 <template id="numberBetween">
 const isBetween = value => value !== undefined;
+const [b0, b1, b2] = [149, 150, 1200];
 contracts.numberBetween = {
   method: numberBetween,
   expected({min, max, inclusive} = {}) {

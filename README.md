@@ -1,6 +1,5 @@
 ## Use a 'Design by contract' pattern to check variable types
 
-
 > [!IMPORTANT]
 > This repository is moved to [Codeberg.org](https://codeberg.org/KooiInc/es-contract-fiddler).
 >

@@ -183,7 +183,7 @@ function createHeaderAndExplanation() {
     ? `<p><a target="_top" href="//stackblitz.com/@KooiInc">All projects</a> | ` : ``;
   const backToRepoLink = `<a target="${isSB ? `_blank` : `_top`}" href="https://codeberg.org/KooiInc/es-contract-fiddler"
       >Repository</a>`;
-  const githubLink = `<a target="_blank" href="https://github.com/KooiInc/es-contract-fiddler"
+  const githubLink = `<a target="_top" href="https://github.com/KooiInc/es-contract-fiddler"
       >@Github</a>`
   print(`!!${splat(textBlocks.pageheader, {sbLink, backToRepoLink, githubLink})}
     <p><button class="explainer closed">explainer</button>

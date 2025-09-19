@@ -1,6 +1,6 @@
 import contractFactory from "../es-contract.js";
-import {logFactory, $} from "https://unpkg.com/stackblitzhelpers@latest/index.browser.js";
-import splat from "https://unpkg.com/splat-es/Bundle/index.min.js";
+import {logFactory, $, splat} from "https://unpkg.com/dynamic-html-helpers@latest/Bundle/htmlhelpers.min.js";
+//import splat from "https://unpkg.com/splat-es/Bundle/index.min.js";
 import styleDocument from "./styleDoc.js";
 const textBlocks = await importTexts();
 const {contracts, IS,} = contractFactory({reporter: demoReporter});
@@ -215,7 +215,7 @@ function createHandling() {
   const smooth = {behavior: "smooth"};
   $.delegate( `click`, `.showViolations`, () =>
     $.Popup.show({ content: `<div class="violationPopup">${reportDiv.HTML.get()}</div>` }) );
-  $.delegate(`click`, `.explainer`, (_, self) => {
+  $.delegate(`click`, `.explainer`, ({self}) => {
     const closed = `closed`;
     switch(self.hasClass(`closed`)) {
       case true:
@@ -226,7 +226,7 @@ function createHandling() {
         return $(`.explainerCode`).addClass(`closed`);
     }
   });
-  $.delegate(`click`, `[data-for-id]`, (_, self) => {
+  $.delegate(`click`, `[data-for-id]`, ({self}) => {
     $.node(`[data-id="${self.data.get(`forId`)}"]`)?.scrollIntoView(smooth);
   });
   $.delegate(`click`, `span.toTop`, () => {
@@ -324,7 +324,7 @@ function demoInt() {
     `${toCode("[...[1,2,,3,4,`NADA`,,42.1,5]].map(v => contracts.int(v, {defaultValue: NaN}))")}<br>=> [${
     [...[1,2,,3,4,`NADA`,,,42.1,5]].map((v) => contracts.int(v, {defaultValue: NaN}))}]
     <div><b>Note</b>: ${toCode(`Array.map`)} will <i>not</i> process empty slots of an array.</div>
-    <div>A <i>copy</i> (${toCode(`[...[1,2,3,4,\`NADA\`,,,42.01,5]]`)}) of the array 
+    <div>A <i>copy</i> (${toCode(`[...[1,2,3,4,\`NADA\`,,,42.01,5]]`)}) of the array
       converts empty slots to slots with value ${toCode(`undefined`)},
       so in that case ${toCode(`{defaultValue: NaN}`)} will be be honored</div>`);
 }

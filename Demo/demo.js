@@ -1,6 +1,5 @@
 import contractFactory from "../es-contract.js";
 import {logFactory, $, splat} from "https://unpkg.com/dynamic-html-helpers@latest/Bundle/htmlhelpers.min.js";
-//import splat from "https://unpkg.com/splat-es/Bundle/index.min.js";
 import styleDocument from "./styleDoc.js";
 const textBlocks = await importTexts();
 const {contracts, IS,} = contractFactory({reporter: demoReporter});

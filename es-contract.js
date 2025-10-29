@@ -1,4 +1,4 @@
-import IS from "https://unpkg.com/typeofanything@latest/typeofany.module.js";
+import IS from "https://unpkg.com/typeofanything@latest/src/typeofany.module.js";
 import languageFactory from "./Language.js";
 
 export default typeContractFactory;

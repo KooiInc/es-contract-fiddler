@@ -15,7 +15,7 @@ function styleDocument($) {
       font-family: Georgia, verdana;
       content: '\\201C';
       position: absolute;
-      font-size: 2rem;
+      font-size: 3rem;
       color: #c0c0c0;
       margin-left: -2rem;
       margin-top: 0.5rem;
@@ -110,7 +110,7 @@ function styleDocument($) {
     `code.inline {
       background-color: rgb(227, 230, 232);
       color: rgb(12, 13, 14);
-      padding: 0 4px;
+      padding: 1px 4px;
       display: inline-block;
       border-radius: 4px;
       margin: 1px 0;
@@ -146,6 +146,17 @@ function styleDocument($) {
         }
       
         li {
+          /*font-family: Georgia, verdana;*/
+          font-size: 1.1em;
+          &[data-for-id] {
+            cursor: pointer;
+            color: cornflowerblue;
+            
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+          
           &.head {
             font-family: Georgia, verdana;
             color: #777;
@@ -160,7 +171,9 @@ function styleDocument($) {
             border: 1px dotted #999;
             padding: 8px;
             margin-left: -1em;
-      
+            
+            h3.between { color: #777 }
+            
             ul {
               li {
                 &.head {
@@ -184,7 +197,6 @@ function styleDocument($) {
                 cursor: pointer;
       
                 &:hover {
-                  color: blue;
                   text-decoration: underline;
                 }
               }

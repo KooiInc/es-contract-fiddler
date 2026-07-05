@@ -204,7 +204,7 @@ function createNavigation() {
     {class: "index"},
     $.h3({class: "between"}, `Index`),
     index )
-  .renderTo($(`#log2screen li:nth-child(2)`), $.at.afterend);
+  .renderTo($(`#log2screen li:nth-child(2)`));
 
   $.span({class: "toTop", title: `back to top`})
     .css({left: `${$(`#log2screen`).dimensions.right - 10}px`})
@@ -270,7 +270,7 @@ function demoBool() {
     codeToFormatted(textBlocks.bool),
     `${toCode("bool()")} => ${bool()}`,
     // noinspection PointlessBooleanExpressionJS
-    `${toCode("bool(!!!undefined)")} => ${bool(!!!undefined)}`,
+    `${toCode("bool(!!undefined)")} => ${bool(!!undefined)}`,
     `${toCode("bool('hello')")} => ${bool(`hello`)}`,
     `${toCode("bool(0)")} => ${bool(0)}`,
     `${toCode("bool(!!0)")} => ${bool(!!0)}`,

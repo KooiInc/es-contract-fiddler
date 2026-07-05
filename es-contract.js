@@ -68,8 +68,6 @@ function newContractFactory( params ) {
       const expectedValue = IS(expected, Function) ? expected(args4Reporting) : expected;
       let valueDefault = defaultValue || args4Reporting.defaultValue;
 
-      (name || method.name) === `int` && console.log(valueDefault);
-
       const [doReport, throwIt] = [
         args4Reporting.reportViolation ?? reportViolationsByDefault,
         args4Reporting.shouldThrow ?? shouldThrow ];

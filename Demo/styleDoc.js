@@ -2,13 +2,14 @@ export default styleDocument;
 
 function styleDocument($) {
   $.editCssRules(
+    `body { font-family: Georgia, verdana; }`,
     `.q {
       padding: 0 6rem 0px 2rem;
       font-family: Georgia, verdana;
       font-style: italic;
       color: #777;
       margin-bottom: 1rem;
-      max-width: 70%;
+      max-width: 70vw;
     }`,
     `.q:before {
       font-family: Georgia, verdana;
@@ -21,6 +22,7 @@ function styleDocument($) {
      }`,
     `h3 {
       color: cornflowerblue;
+      font-family: Georgia, verdana;
       padding: 3px 6px;
       border: 1px dotted #999;
       display: inline-block;
@@ -44,29 +46,6 @@ function styleDocument($) {
       display: inline-block;
       border: none;
      }`,
-    `#log2screen div.index {
-       margin-top: 1.5rem;
-       border: 1px dotted #999;
-       padding: 8px;
-       margin-left: -1em;
-       ul {
-         margin: 0.4em 0 0 -1.3em;
-         li[data-index-click] {
-            list-style: none;
-            &:before {
-              content: '\\2B0A';
-              display: inline-block;
-              margin-right: 8px;
-            }
-            margin-top: 0.2em;
-            cursor: pointer;
-            &:hover {
-              color: blue;
-              text-decoration: underline;
-         }
-       }
-      }
-    }`,
     `pre.codebox {
       box-shadow: 2px 2px 6px #555;
       border-radius: 6px;
@@ -142,23 +121,76 @@ function styleDocument($) {
       position: absolute;
       overflow-x: hidden;
     }`,
-    `#log2screen {
-      margin: 0 auto;
-      & li div {
-        line-height: 1.4rem;
-      }
-      @media (max-width: 1024px) {
-        max-width: 90vw;
-      }
-      @media (min-width: 1024px) and (max-width: 1200px) {
-        max-width: 80vw;
-      }
-      @media (min-width: 1200px) and (max-width: 1600px) {
-        max-width: 70vw;
-      }
-      @media (min-width: 1600px) {
-        max-width: 50vw;
-      }
-    }`
+    `ul#log2screen {
+        margin: 0 auto;
+        width: 40vw;
+        
+        @media (width <= 640px) {
+          width: 90vw;
+        }
+        
+        @media (width > 640px) and (width <= 1024px) {
+          width: 70vw;
+        }
+        
+        @media (width > 1024px) and (width <= 1200px) {
+          width: 60vw;
+        }
+    
+        @media (width > 1200px) and (width <= 1600px) {
+          width: 50vw;
+        }
+    
+        @media (width > 1600px) {
+          width: 40vw;
+        }
+      
+        li {
+          &.head {
+            font-family: Georgia, verdana;
+            color: #777;
+          }
+      
+          div {
+            line-height: 1.4rem;
+          }
+      
+          div.index {
+            margin-top: 1.5rem;
+            border: 1px dotted #999;
+            padding: 8px;
+            margin-left: -1em;
+      
+            ul {
+              li {
+                &.head {
+                  font-family: Georgia, verdana;
+                  color: cornflowerblue;
+                }
+              }
+      
+              margin: 0.4em 0 0 -1.3em;
+      
+              li[data-index-click] {
+                list-style: none;
+      
+                &:before {
+                  content: '\\2B0A';
+                  display: inline-block;
+                  margin-right: 8px;
+                }
+      
+                margin-top: 0.2em;
+                cursor: pointer;
+      
+                &:hover {
+                  color: blue;
+                  text-decoration: underline;
+                }
+              }
+            }
+          }
+        }
+      }`
   );
 }

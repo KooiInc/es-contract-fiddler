@@ -239,7 +239,7 @@ function demoSystem() {
     `!!<h3>System</h3>`,
     codeToFormatted(textBlocks.system),
     `Contracts added, testing demoReporter without input:<br>
-    <code class="inline">demoReporter()</code> => ${demoReporter()} (see contract violation logs)`
+    <code class="inline">demoReporter() ?? "(see contract violation logs)"</code> => ${demoReporter() ?? "(see contract violation logs)"}`
   );
 }
 

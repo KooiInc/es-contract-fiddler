@@ -146,7 +146,6 @@ function styleDocument($) {
         }
       
         li {
-          /*font-family: Georgia, verdana;*/
           font-size: 1.1em;
           &[data-for-id] {
             cursor: pointer;
@@ -182,7 +181,7 @@ function styleDocument($) {
                 }
               }
       
-              margin: 0.4em 0 0 -1.3em;
+              margin: 0.4em 0 0 -0.7em;
       
               li[data-index-click] {
                 list-style: none;

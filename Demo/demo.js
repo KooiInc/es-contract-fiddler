@@ -1,10 +1,11 @@
 import contractFactory from "../es-contract.js";
-import {logFactory, $, splat} from "https://unpkg.com/dynamic-html-helpers@latest/Bundle/htmlhelpers.min.js";
+import {logFactory, $, splatModule} from "https://unpkg.com/dynamic-html-helpers@latest/Bundle/htmlhelpers.min.js";
 import styleDocument from "./styleDoc.js";
 const textBlocks = await importTexts();
 const {contracts, IS,} = contractFactory({reporter: demoReporter});
 const isSB = /stackblitz/i.test(location.href);
 const { log:print } = logFactory();
+const {interpolate: splat} = splatModule;
 const reportDiv = $.div({id:`ViolationsReport`}).append(`<h3>All logged contract violations</h3>`);
 createDemo();
 window.contracts = contracts;
@@ -15,7 +16,7 @@ function createDemo() {
   addContracts4Demo(contracts);
   createHandling();
   createHeaderAndExplanation();
-  print(`!!<h2>Examples</h2>`);
+  print(`!!<h2 class="g">Examples</h2>`);
   demoSystem();
   demoPlainString();
   demoBool();
@@ -206,7 +207,7 @@ function createNavigation() {
   .renderTo($(`#log2screen li:nth-child(2)`), $.at.afterend);
 
   $.span({class: "toTop", title: `back to top`})
-    .css({left: `${$(`#log2screen`).dimensions.right - 40}px`})
+    .css({left: `${$(`#log2screen`).dimensions.right - 10}px`})
     .renderTo(document.body);
 }
 
